@@ -4,7 +4,7 @@ import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-typedef DirectoryCallback = void Function(Directory);
+typedef DirectoryCallback = void Function(String);
 void main() {
   runApp(MyApp());
 }
@@ -38,27 +38,36 @@ class _MainWidgetState extends State<MainWidget> {
 
   // Make New Function
   void _listofFiles() async {
-    var permission = await Permission.mediaLibrary.request();
+    PermissionStatus permission = await Permission.storage.status;
     if (permission.isGranted) {
       print("granted");
       directory = await ExtStorage.getExternalStoragePublicDirectory(
           ExtStorage.DIRECTORY_DOWNLOADS);
 
-      setFileAndParent(Directory(directory!));
+      setFileAndParent(directory!);
     } else {
       print("not granted");
+      PermissionStatus status = await Permission.storage.request();
+      if (status.isGranted) {
+        print("granted");
+        directory = await ExtStorage.getExternalStoragePublicDirectory(
+            ExtStorage.DIRECTORY_DOWNLOADS);
+
+        setFileAndParent(directory!);
+      } else {
+        print('Please Grant Storage Permissions');
+      }
     }
   }
 
-  void setFileAndParent(Directory dir) {
-    print(dir);
-    final someFile = dir.listSync(followLinks: false).toList();
+  void setFileAndParent(String dirPath) {
     setState(
       () {
-        file = someFile; //use your folder name insted of resume.
+        file = getFilesAndFolders(
+            dirPath); //use your folder name insted of resume.
         parent = {
-          "dir": dir,
-          "name": dir.path.split("/").last,
+          "dir": Directory(dirPath),
+          "name": dirPath.split("/").last,
           "children": file.length.toString()
         };
       },
@@ -149,7 +158,7 @@ class ListFIleItem extends StatelessWidget {
       ),
       child: GestureDetector(
         onTap: () {
-          callback(dir);
+          callback(dir.path);
         },
         child: BoxWithShadow(
           width: double.infinity,
