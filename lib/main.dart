@@ -1,8 +1,7 @@
 import 'dart:io';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:ext_storage/ext_storage.dart';
+import 'package:distancelearning_mobile/screens/main_screen.dart';
+import 'package:distancelearning_mobile/screens/splash.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 typedef DirectoryCallback = void Function(String);
 void main() {
@@ -15,122 +14,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      home: MainWidget(),
-    );
-  }
-}
-
-class MainWidget extends StatefulWidget {
-  @override
-  _MainWidgetState createState() => _MainWidgetState();
-}
-
-class _MainWidgetState extends State<MainWidget> {
-  String? directory;
-  Map<String, dynamic>? parent;
-  List<FileSystemEntity> file = [];
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _listofFiles();
-  }
-
-  // Make New Function
-  void _listofFiles() async {
-    PermissionStatus permission = await Permission.storage.status;
-    if (permission.isGranted) {
-      print("granted");
-      directory = await ExtStorage.getExternalStoragePublicDirectory(
-          ExtStorage.DIRECTORY_DOWNLOADS);
-
-      setFileAndParent(directory!);
-    } else {
-      print("not granted");
-      PermissionStatus status = await Permission.storage.request();
-      if (status.isGranted) {
-        print("granted");
-        directory = await ExtStorage.getExternalStoragePublicDirectory(
-            ExtStorage.DIRECTORY_DOWNLOADS);
-
-        setFileAndParent(directory!);
-      } else {
-        print('Please Grant Storage Permissions');
-      }
-    }
-  }
-
-  void setFileAndParent(String dirPath) {
-    setState(
-      () {
-        file = getFilesAndFolders(
-            dirPath); //use your folder name insted of resume.
-        parent = {
-          "dir": Directory(dirPath),
-          "name": dirPath.split("/").last,
-          "children": file.length.toString()
-        };
+      initialRoute: Splash.routeName,
+      routes: {
+        Splash.routeName: (context) => const Splash(),
+        MainWidget.routeName: (context) => MainWidget(),
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
-    final List<ListFIleItem> listItems = file
-        .map((element) => ListFIleItem(
-              height: height,
-              name: element.path.split("/").last,
-              dir: Directory(element.path),
-              callback: setFileAndParent,
-            ))
-        .toList();
-    return Scaffold(
-      backgroundColor: const Color.fromRGBO(244, 249, 240, 100),
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          Container(
-            color: const Color(0xff468908),
-            width: double.infinity,
-            height: height / 3,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [const MainTexts(), Flag(width: width, height: height)],
-            ),
-          ),
-          Align(
-            alignment: AlignmentDirectional.bottomCenter,
-            child: Container(
-              width: double.infinity,
-              height: ((2 * height) / 3) + 15,
-              child: Stack(
-                children: [
-                  Column(
-                    children: [
-                      TopBarWithSearch(
-                        height: height,
-                        width: width,
-                        data: parent,
-                      ),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: listItems.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return listItems[index];
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          )
-        ],
-      ),
     );
   }
 }
@@ -257,14 +145,14 @@ class TopBarWithSearch extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  data!["name"]?.toString() ?? "",
+                  (data != null) ? data!["name"].toString() : "",
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  "${data!["children"] ?? 0} Folders",
+                  "${(data != null) ? data!["children"] : 0} Folders",
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w300,
