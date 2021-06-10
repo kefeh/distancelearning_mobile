@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
 import 'package:distancelearning_mobile/screens/main_screen.dart';
 import 'package:distancelearning_mobile/screens/splash.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 typedef DirectoryCallback = void Function(String);
 void main() {
@@ -12,30 +14,28 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      initialRoute: Splash.routeName,
-      routes: {
-        Splash.routeName: (context) => const Splash(),
-        MainWidget.routeName: (context) => MainWidget(),
-      },
+    return ChangeNotifierProvider(
+      create: (context) => MainScreenChangeNotifier(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        initialRoute: Splash.routeName,
+        routes: {
+          Splash.routeName: (context) => const Splash(),
+          MainWidget.routeName: (context) => MainWidget(),
+        },
+      ),
     );
   }
 }
 
 class ListFIleItem extends StatelessWidget {
-  const ListFIleItem({
-    Key? key,
-    required this.height,
-    required this.name,
-    required this.dir,
-    required this.callback,
-  }) : super(key: key);
+  const ListFIleItem(
+      {Key? key, required this.height, required this.name, required this.dir})
+      : super(key: key);
 
   final double height;
   final String name;
   final Directory dir;
-  final DirectoryCallback callback;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class ListFIleItem extends StatelessWidget {
       ),
       child: GestureDetector(
         onTap: () {
-          callback(dir.path);
+          context.read<MainScreenChangeNotifier>().setFiles(dir.path);
         },
         child: BoxWithShadow(
           width: double.infinity,
@@ -125,15 +125,14 @@ class TopBarWithSearch extends StatelessWidget {
     Key? key,
     required this.height,
     required this.width,
-    required this.data,
   }) : super(key: key);
 
   final double height;
   final double width;
-  final Map<String, dynamic>? data;
 
   @override
   Widget build(BuildContext context) {
+    final data = context.watch<MainScreenChangeNotifier>().parent;
     return BoxWithShadow(
       height: height / 6,
       width: double.infinity,
@@ -145,14 +144,14 @@ class TopBarWithSearch extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  (data != null) ? data!["name"].toString() : "",
+                  data["name"].toString(),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  "${(data != null) ? data!["children"] : 0} Folders",
+                  "${(data["children"] != null) ? data["children"] : 0} Folders",
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w300,
