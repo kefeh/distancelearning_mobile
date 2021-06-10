@@ -1,7 +1,9 @@
 import 'dart:io';
 
-import 'package:distancelearning_mobile/main.dart';
 import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
+import 'package:distancelearning_mobile/widgets/helpers.dart';
+import 'package:distancelearning_mobile/widgets/list_items.dart';
+import 'package:distancelearning_mobile/widgets/top_bar_search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
