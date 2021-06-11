@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
+import 'package:distancelearning_mobile/utils/files.dart';
 import 'package:distancelearning_mobile/widgets/helpers.dart';
 import 'package:distancelearning_mobile/widgets/list_items.dart';
 import 'package:distancelearning_mobile/widgets/top_bar_search.dart';
@@ -17,7 +18,8 @@ class MainWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-
+    final Map<String, dynamic> parent =
+        context.watch<MainScreenChangeNotifier>().parent;
     final List<Widget> listItems = context
         .watch<MainScreenChangeNotifier>()
         .files
@@ -37,7 +39,16 @@ class MainWidget extends StatelessWidget {
         .toList();
     return WillPopScope(
       onWillPop: () async {
-        return shouldPop;
+        final String dirPath = await getMainDirPath();
+        final String parentDir =
+            await getParentDirPath(parent['dir'].path.toString());
+
+        if (parent['dir'].path == dirPath) {
+          return Future.value(true);
+        } else {
+          context.read<MainScreenChangeNotifier>().setFiles(parentDir);
+          return Future.value(false);
+        }
       },
       child: Scaffold(
         backgroundColor: const Color.fromRGBO(244, 249, 240, 1),
