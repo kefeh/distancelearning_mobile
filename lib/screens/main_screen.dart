@@ -18,15 +18,21 @@ class MainWidget extends StatelessWidget {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
-    final List<ListFIleItem> listItems = context
+    final List<Widget> listItems = context
         .watch<MainScreenChangeNotifier>()
         .files
         .map(
-          (element) => ListFIleItem(
-            height: height,
-            name: element.path.split("/").last,
-            dir: Directory(element.path),
-          ),
+          (element) => element.path.split("/").last.contains(".mp4")
+              ? ListVideoItem(
+                  height: height,
+                  name: element.path.split("/").last,
+                  dir: Directory(element.path),
+                )
+              : ListFIleItem(
+                  height: height,
+                  name: element.path.split("/").last,
+                  dir: Directory(element.path),
+                ),
         )
         .toList();
     return WillPopScope(
