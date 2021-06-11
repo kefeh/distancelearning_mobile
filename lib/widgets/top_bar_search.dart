@@ -67,6 +67,7 @@ class SearchForm extends StatelessWidget {
           width: (2 * width / 3) + 100,
           color: const Color.fromRGBO(93, 206, 4, 0.1),
           child: TextFormField(
+            onChanged: context.read<MainScreenChangeNotifier>().search,
             decoration: const InputDecoration(
               border: OutlineInputBorder(
                 borderSide: BorderSide.none,

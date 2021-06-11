@@ -21,4 +21,20 @@ class MainScreenChangeNotifier extends ChangeNotifier {
     };
     notifyListeners();
   }
+
+  void search(String searchTerm) {
+    if (searchTerm.replaceAll(" ", "") == "") {
+      setFiles(parent["dir"].path.toString());
+    } else {
+      _files = _files
+          .where(
+            (file) => basename(file.path).contains(
+              searchTerm.replaceAll(" ", ""),
+            ),
+          )
+          .toList();
+    }
+
+    notifyListeners();
+  }
 }
