@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:ext_storage/ext_storage.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:thumbnails/thumbnails.dart';
 
 Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
   final String newPath = path ?? await getMainDirPath();
@@ -31,4 +33,16 @@ Future<String> getParentDirPath(String? path) async {
 Future<String> getMainDirPath() {
   return ExtStorage.getExternalStoragePublicDirectory(
       ExtStorage.DIRECTORY_DOWNLOADS);
+}
+
+Future<String> getThumbnail(String videoPathUrl) async {
+  final appDocDir = await getApplicationDocumentsDirectory();
+  final folderPath = appDocDir.path;
+  final String thumb = await Thumbnails.getThumbnail(
+      thumbnailFolder: folderPath,
+      videoFile: videoPathUrl,
+      imageType: ThumbFormat.PNG, //this image will store in created folderpath
+      quality: 30);
+  print(thumb);
+  return thumb;
 }

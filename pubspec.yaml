@@ -9,13 +9,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  chewie:
+  chewie: null
   cupertino_icons: ^1.0.2
   ext_storage: ^1.0.3
   fluttertoast: ^8.0.7
+  path: ^1.8.0
   path_provider: ^2.0.2
   permission_handler: ^8.0.0+2
   provider: ^5.0.0
+  thumbnails: ^1.0.1
   video_player: ^2.1.6
 
 dev_dependencies:

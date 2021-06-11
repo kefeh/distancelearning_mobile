@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
+import 'package:distancelearning_mobile/utils/files.dart';
 import 'package:distancelearning_mobile/views/video_player.dart';
 import 'package:distancelearning_mobile/widgets/helpers.dart';
 import 'package:flutter/material.dart';
@@ -81,11 +82,17 @@ class ListVideoItem extends StatefulWidget {
 class _ListVideoItemState extends State<ListVideoItem> {
   late VideoPlayerController _videoController;
   late File videoFile;
+  File? thumbnailFile;
 
   @override
   void initState() {
     super.initState();
     videoFile = File(widget.dir.path);
+    getThumbnail(widget.dir.path).then((value) => {
+          setState(() {
+            thumbnailFile = File(value);
+          })
+        });
     _videoController = VideoPlayerController.file(videoFile);
   }
 
@@ -123,16 +130,12 @@ class _ListVideoItemState extends State<ListVideoItem> {
                 Expanded(
                   child: Row(
                     children: [
-                      if (_videoController.value.isInitialized)
-                        Container(
-                          width: 100.0,
-                          height: 56.0,
-                          child: VideoPlayer(_videoController),
-                        )
-                      else
-                        const CircularProgressIndicator(),
-                      const SizedBox(
-                        width: 25,
+                      Container(
+                        width: 100.0,
+                        height: 56.0,
+                        child: thumbnailFile != null
+                            ? Image.file(thumbnailFile!)
+                            : const Icon(Icons.video_collection_outlined),
                       ),
                       Text(
                         widget.name,
