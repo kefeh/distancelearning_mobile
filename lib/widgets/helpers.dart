@@ -34,9 +34,13 @@ class BoxWithShadow extends StatelessWidget {
   }
 }
 
+enum AnAlignment { center, left, right }
+
 class MainTexts extends StatelessWidget {
+  final AnAlignment align;
   const MainTexts({
     Key? key,
+    required this.align,
   }) : super(key: key);
 
   @override
@@ -48,7 +52,11 @@ class MainTexts extends StatelessWidget {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: align != AnAlignment.center
+            ? (align == AnAlignment.left
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.end)
+            : CrossAxisAlignment.center,
         children: const [
           Text(
             "Minesec",

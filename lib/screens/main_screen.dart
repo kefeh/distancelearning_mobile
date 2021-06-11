@@ -61,7 +61,9 @@ class MainWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const MainTexts(),
+                      const MainTexts(
+                        align: AnAlignment.left,
+                      ),
                       Flag(width: width, height: height)
                     ],
                   ),
