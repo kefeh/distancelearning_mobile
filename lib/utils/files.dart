@@ -11,7 +11,12 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
   final List<FileSystemEntity> tempFile = dir.listSync();
   for (final FileSystemEntity file in tempFile) {
     if (!basename(file.path).startsWith(".")) {
-      files.add(file);
+      if (file is File && basename(file.path).split(".").last == "mp4") {
+        files.add(file);
+      }
+      if (file is Directory) {
+        files.add(file);
+      }
     }
   }
   return files;
@@ -41,8 +46,7 @@ Future<String> getThumbnail(String videoPathUrl) async {
   final String thumb = await Thumbnails.getThumbnail(
       thumbnailFolder: folderPath,
       videoFile: videoPathUrl,
-      imageType: ThumbFormat.PNG, //this image will store in created folderpath
+      imageType: ThumbFormat.PNG,
       quality: 30);
-  print(thumb);
   return thumb;
 }

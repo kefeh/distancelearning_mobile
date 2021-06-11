@@ -11,9 +11,6 @@ import 'package:provider/provider.dart';
 class MainWidget extends StatelessWidget {
   static const routeName = 'home';
 
-  String? directory;
-  bool shouldPop = true;
-
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -42,7 +39,6 @@ class MainWidget extends StatelessWidget {
         final String dirPath = await getMainDirPath();
         final String parentDir =
             await getParentDirPath(parent['dir'].path.toString());
-
         if (parent['dir'].path == dirPath) {
           return Future.value(true);
         } else {
