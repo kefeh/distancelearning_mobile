@@ -24,12 +24,12 @@ class MainWidget extends StatelessWidget {
           (element) => element.path.split("/").last.contains(".mp4")
               ? ListVideoItem(
                   height: height,
-                  name: element.path.split("/").last,
+                  file: element,
                   dir: Directory(element.path),
                 )
               : ListFIleItem(
                   height: height,
-                  name: element.path.split("/").last,
+                  file: element,
                   dir: Directory(element.path),
                 ),
         )

@@ -5,17 +5,18 @@ import 'package:distancelearning_mobile/utils/files.dart';
 import 'package:distancelearning_mobile/views/video_player.dart';
 import 'package:distancelearning_mobile/widgets/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 class ListFIleItem extends StatelessWidget {
   const ListFIleItem(
-      {Key? key, required this.height, required this.name, required this.dir})
+      {Key? key, required this.height, required this.dir, required this.file})
       : super(key: key);
 
   final double height;
-  final String name;
   final Directory dir;
+  final FileSystemEntity file;
 
   @override
   Widget build(BuildContext context) {
@@ -47,16 +48,10 @@ class ListFIleItem extends StatelessWidget {
                       const SizedBox(
                         width: 25,
                       ),
-                      Text(
-                        name,
-                      ),
+                      NameWithDate(file: file),
                     ],
                   ),
                 ),
-                const Text(
-                  "10 items",
-                  style: TextStyle(fontSize: 10),
-                )
               ],
             ),
           ),
@@ -68,11 +63,11 @@ class ListFIleItem extends StatelessWidget {
 
 class ListVideoItem extends StatefulWidget {
   const ListVideoItem(
-      {Key? key, required this.height, required this.name, required this.dir})
+      {Key? key, required this.height, required this.file, required this.dir})
       : super(key: key);
 
   final double height;
-  final String name;
+  final FileSystemEntity file;
   final Directory dir;
 
   @override
@@ -123,7 +118,7 @@ class _ListVideoItemState extends State<ListVideoItem> {
           width: double.infinity,
           height: widget.height / 10,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -131,15 +126,25 @@ class _ListVideoItemState extends State<ListVideoItem> {
                   child: Row(
                     children: [
                       Container(
-                        width: 100.0,
-                        height: 56.0,
+                        width: 60.0,
+                        height: 60.0,
+                        decoration: BoxDecoration(
+                            color: const Color.fromRGBO(107, 123, 250, 0.7),
+                            borderRadius: BorderRadius.circular(20)),
                         child: thumbnailFile != null
-                            ? Image.file(thumbnailFile!)
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image.file(
+                                  thumbnailFile!,
+                                  fit: BoxFit.fill,
+                                ),
+                              )
                             : const Icon(Icons.video_collection_outlined),
                       ),
-                      Text(
-                        widget.name,
+                      const SizedBox(
+                        width: 15,
                       ),
+                      NameWithDate(file: widget.file),
                     ],
                   ),
                 ),
@@ -152,6 +157,36 @@ class _ListVideoItemState extends State<ListVideoItem> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class NameWithDate extends StatelessWidget {
+  final FileSystemEntity file;
+  const NameWithDate({Key? key, required this.file}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final String name = file.path.split("/").last;
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            name,
+          ),
+          const SizedBox(
+            height: 5,
+          ),
+          Text(
+            DateFormat.yMMMMd('en_US')
+                .add_jm()
+                .format(file.statSync().modified),
+            style: const TextStyle(fontSize: 10),
+          ),
+        ],
       ),
     );
   }
