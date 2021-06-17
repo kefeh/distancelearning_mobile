@@ -17,23 +17,9 @@ class MainWidget extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final Map<String, dynamic> parent =
         context.watch<MainScreenChangeNotifier>().parent;
-    final List<Widget> listItems = context
-        .watch<MainScreenChangeNotifier>()
-        .files
-        .map(
-          (element) => element.path.split("/").last.contains(".mp4")
-              ? ListVideoItem(
-                  height: height,
-                  file: element,
-                  dir: Directory(element.path),
-                )
-              : ListFIleItem(
-                  height: height,
-                  file: element,
-                  dir: Directory(element.path),
-                ),
-        )
-        .toList();
+    final List<FileSystemEntity> listItems =
+        context.watch<MainScreenChangeNotifier>().files.toList();
+
     return WillPopScope(
       onWillPop: () async {
         final String dirPath = await getMainDirPath();
@@ -51,96 +37,155 @@ class MainWidget extends StatelessWidget {
         resizeToAvoidBottomInset: false,
         body: LayoutBuilder(
           builder: (context, constraints) {
-            if (constraints.maxWidth < 600) {
-              return PageView(
-                children: [
-                  Stack(
-                    children: [
-                      Container(
-                        color: const Color(0xff468908),
-                        width: double.infinity,
-                        height: height / 3,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const MainTexts(
-                              align: AnAlignment.left,
-                            ),
-                            Flag(width: width, height: height)
-                          ],
-                        ),
-                      ),
-                      Align(
-                        alignment: AlignmentDirectional.bottomCenter,
-                        child: Container(
-                          width: double.infinity,
-                          height: ((2 * height) / 3) + 15,
-                          child: Stack(
-                            children: [
-                              Column(
-                                children: [
-                                  TopBarWithSearch(
-                                    height: height / 6,
-                                    width: width,
-                                  ),
-                                  Expanded(
-                                    child: ListView.builder(
-                                      itemCount: listItems.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        return listItems[index];
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ],
-              );
-            } else {
-              return PageView(
-                children: [
-                  Stack(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: ((2 * height) / 3) + 15,
-                        child: Stack(
-                          children: [
-                            Column(
-                              children: [
-                                TopBarWithSearch(
-                                  height: height / 3,
-                                  width: width,
-                                ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: listItems.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return listItems[index];
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ],
-              );
-            }
+            return PageView(
+              children: [
+                if (constraints.maxWidth < 600)
+                  SmallLayout(
+                      height: height, width: width, listItems: listItems)
+                else
+                  LargeLayout(
+                      height: height, width: width, listItems: listItems)
+              ],
+            );
           },
         ),
       ),
+    );
+  }
+}
+
+class LargeLayout extends StatelessWidget {
+  const LargeLayout({
+    Key? key,
+    required this.height,
+    required this.width,
+    required this.listItems,
+  }) : super(key: key);
+
+  final double height;
+  final double width;
+  final List<FileSystemEntity> listItems;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<FileSystemEntity> files = listItems.whereType<File>().toList();
+    final List<FileSystemEntity> directory =
+        listItems.whereType<Directory>().toList();
+    return SafeArea(
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: height,
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    TopBarWithSearch(
+                      height: height / 3,
+                      width: width,
+                    ),
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Container(),
+                          ListView.builder(
+                            itemCount: files.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return ListVideoItem(
+                                height: height,
+                                file: listItems[index],
+                                dir: Directory(listItems[index].path),
+                              );
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class SmallLayout extends StatelessWidget {
+  const SmallLayout({
+    Key? key,
+    required this.height,
+    required this.width,
+    required this.listItems,
+  }) : super(key: key);
+
+  final double height;
+  final double width;
+  final List<FileSystemEntity> listItems;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          color: const Color(0xff468908),
+          width: double.infinity,
+          height: height / 3,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const MainTexts(
+                align: AnAlignment.left,
+              ),
+              Flag(width: width, height: height)
+            ],
+          ),
+        ),
+        Align(
+          alignment: AlignmentDirectional.bottomCenter,
+          child: Container(
+            width: double.infinity,
+            height: ((2 * height) / 3) + 15,
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    TopBarWithSearch(
+                      height: height / 6,
+                      width: width,
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: listItems.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return listItems[index]
+                                  .path
+                                  .split("/")
+                                  .last
+                                  .contains(".mp4")
+                              ? ListVideoItem(
+                                  height: height,
+                                  file: listItems[index],
+                                  dir: Directory(listItems[index].path),
+                                )
+                              : ListFIleItem(
+                                  height: height,
+                                  file: listItems[index],
+                                  dir: Directory(listItems[index].path),
+                                );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
     );
   }
 }
