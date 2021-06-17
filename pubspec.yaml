@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   chewie: null
   cupertino_icons: ^1.0.2
+  device_preview: ^0.7.3
   ext_storage: ^1.0.3
   fluttertoast: ^8.0.7
   intl: ^0.17.0

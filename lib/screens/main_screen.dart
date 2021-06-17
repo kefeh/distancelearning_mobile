@@ -49,55 +49,96 @@ class MainWidget extends StatelessWidget {
       child: Scaffold(
         backgroundColor: const Color.fromRGBO(244, 249, 240, 1),
         resizeToAvoidBottomInset: false,
-        body: PageView(
-          children: [
-            Stack(
-              children: [
-                Container(
-                  color: const Color(0xff468908),
-                  width: double.infinity,
-                  height: height / 3,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 600) {
+              return PageView(
+                children: [
+                  Stack(
                     children: [
-                      const MainTexts(
-                        align: AnAlignment.left,
+                      Container(
+                        color: const Color(0xff468908),
+                        width: double.infinity,
+                        height: height / 3,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const MainTexts(
+                              align: AnAlignment.left,
+                            ),
+                            Flag(width: width, height: height)
+                          ],
+                        ),
                       ),
-                      Flag(width: width, height: height)
+                      Align(
+                        alignment: AlignmentDirectional.bottomCenter,
+                        child: Container(
+                          width: double.infinity,
+                          height: ((2 * height) / 3) + 15,
+                          child: Stack(
+                            children: [
+                              Column(
+                                children: [
+                                  TopBarWithSearch(
+                                    height: height / 6,
+                                    width: width,
+                                  ),
+                                  Expanded(
+                                    child: ListView.builder(
+                                      itemCount: listItems.length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return listItems[index];
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                     ],
                   ),
-                ),
-                Align(
-                  alignment: AlignmentDirectional.bottomCenter,
-                  child: Container(
-                    width: double.infinity,
-                    height: ((2 * height) / 3) + 15,
-                    child: Stack(
-                      children: [
-                        Column(
+                ],
+              );
+            } else {
+              return PageView(
+                children: [
+                  Stack(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: ((2 * height) / 3) + 15,
+                        child: Stack(
                           children: [
-                            TopBarWithSearch(
-                              height: height,
-                              width: width,
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: listItems.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return listItems[index];
-                                },
-                              ),
+                            Column(
+                              children: [
+                                TopBarWithSearch(
+                                  height: height / 3,
+                                  width: width,
+                                ),
+                                Expanded(
+                                  child: ListView.builder(
+                                    itemCount: listItems.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return listItems[index];
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      )
+                    ],
                   ),
-                )
-              ],
-            ),
-          ],
+                ],
+              );
+            }
+          },
         ),
       ),
     );

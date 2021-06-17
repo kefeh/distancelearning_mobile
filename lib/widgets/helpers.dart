@@ -14,7 +14,6 @@ class BoxWithShadow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height,
       width: width,
       decoration: const BoxDecoration(
         boxShadow: [

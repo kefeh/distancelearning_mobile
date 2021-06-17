@@ -17,10 +17,13 @@ class TopBarWithSearch extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = context.watch<MainScreenChangeNotifier>().parent;
     return BoxWithShadow(
-      height: height / 6,
-      width: double.infinity,
+      height: height,
+      width: width,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 8.0,
+          vertical: 16.0,
+        ),
         child: Column(
           children: [
             Row(
