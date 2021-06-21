@@ -139,3 +139,33 @@ class Flag extends StatelessWidget {
     );
   }
 }
+
+class ColoredBoxWithFlag extends StatelessWidget {
+  const ColoredBoxWithFlag({
+    Key? key,
+    required this.width,
+    required this.height,
+  }) : super(key: key);
+
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xff468908),
+      width: width,
+      height: height / 3,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const MainTexts(
+            align: AnAlignment.left,
+          ),
+          Flag(width: width, height: height)
+        ],
+      ),
+    );
+  }
+}
