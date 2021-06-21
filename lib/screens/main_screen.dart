@@ -79,6 +79,9 @@ class LargeLayout extends StatelessWidget {
             height: height,
             child: Stack(
               children: [
+                Column(children: [
+
+                ],),
                 Column(
                   children: [
                     TopBarWithSearch(
@@ -129,21 +132,7 @@ class SmallLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(
-          color: const Color(0xff468908),
-          width: double.infinity,
-          height: height / 3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const MainTexts(
-                align: AnAlignment.left,
-              ),
-              Flag(width: width, height: height)
-            ],
-          ),
-        ),
+        ColoredBoxWithFlag(width: width, height: height),
         Align(
           alignment: AlignmentDirectional.bottomCenter,
           child: Container(
@@ -186,6 +175,36 @@ class SmallLayout extends StatelessWidget {
           ),
         )
       ],
+    );
+  }
+}
+
+class ColoredBoxWithFlag extends StatelessWidget {
+  const ColoredBoxWithFlag({
+    Key? key,
+    required this.width,
+    required this.height,
+  }) : super(key: key);
+
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xff468908),
+      width: width,
+      height: height / 3,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const MainTexts(
+            align: AnAlignment.left,
+          ),
+          Flag(width: width, height: height)
+        ],
+      ),
     );
   }
 }
