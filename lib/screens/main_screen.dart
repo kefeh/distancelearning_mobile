@@ -79,28 +79,75 @@ class LargeLayout extends StatelessWidget {
             height: height,
             child: Stack(
               children: [
-                Column(children: [
-
-                ],),
                 Column(
                   children: [
                     TopBarWithSearch(
                       height: height / 3,
                       width: width,
                     ),
-                    Expanded(
-                      child: Stack(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 30.0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(),
-                          ListView.builder(
-                            itemCount: files.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return ListVideoItem(
-                                height: height,
-                                file: listItems[index],
-                                dir: Directory(listItems[index].path),
-                              );
-                            },
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                            child: (directory.isNotEmpty)
+                                ? const Text("Folders")
+                                : Container(),
+                          ),
+                          SizedBox(
+                            height: 200,
+                            width: double.infinity,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 30.0,
+                                top: 30.0,
+                              ),
+                              child: ListView.builder(
+                                itemCount: directory.length,
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return ListFileItemLarge(
+                                    file: directory[index],
+                                    dir: Directory(directory[index].path),
+                                  );
+                                },
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                            child: (files.isNotEmpty)
+                                ? const Text("Files")
+                                : Container(),
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: files.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return ListVideoItem(
+                                  height: height,
+                                  file: listItems[index],
+                                  dir: Directory(listItems[index].path),
+                                );
+                              },
+                            ),
                           )
                         ],
                       ),

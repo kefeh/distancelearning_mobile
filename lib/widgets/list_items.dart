@@ -61,6 +61,58 @@ class ListFIleItem extends StatelessWidget {
   }
 }
 
+class ListFileItemLarge extends StatelessWidget {
+  const ListFileItemLarge({
+    Key? key,
+    required this.dir,
+    required this.file,
+  }) : super(key: key);
+
+  final Directory dir;
+  final FileSystemEntity file;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 30.0),
+      child: GestureDetector(
+        onTap: () {
+          context.read<MainScreenChangeNotifier>().setFiles(dir.path);
+        },
+        child: Container(
+          height: 100,
+          width: 200,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.0),
+            color: const Color.fromRGBO(70, 137, 8, 0.08),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.folder_rounded,
+                size: 80,
+                color: Color.fromRGBO(107, 123, 250, 0.7),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              SizedBox(
+                width: 150,
+                child: Text(
+                  file.path.split("/").last,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class ListVideoItem extends StatefulWidget {
   const ListVideoItem(
       {Key? key, required this.height, required this.file, required this.dir})
@@ -118,7 +170,10 @@ class _ListVideoItemState extends State<ListVideoItem> {
           width: double.infinity,
           height: widget.height / 10,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
