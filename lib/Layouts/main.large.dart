@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
+import 'package:distancelearning_mobile/widgets/helpers.dart';
 import 'package:distancelearning_mobile/widgets/list_items.dart';
 import 'package:distancelearning_mobile/widgets/top_bar_search.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class LargeLayout extends StatelessWidget {
+class LargeLayout extends StatefulWidget {
   const LargeLayout({
     Key? key,
     required this.height,
@@ -17,96 +20,133 @@ class LargeLayout extends StatelessWidget {
   final List<FileSystemEntity> listItems;
 
   @override
+  _LargeLayoutState createState() => _LargeLayoutState();
+}
+
+class _LargeLayoutState extends State<LargeLayout> {
+  final ScrollController _controller = ScrollController();
+  bool closeTopController = false;
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      setState(() {
+        closeTopController = _controller.offset > 20;
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final List<FileSystemEntity> files = listItems.whereType<File>().toList();
+    final List<FileSystemEntity> files =
+        widget.listItems.whereType<File>().toList();
     final List<FileSystemEntity> directory =
-        listItems.whereType<Directory>().toList();
-    return SafeArea(
-      child: Stack(
+        widget.listItems.whereType<Directory>().toList();
+    context.read<MainScreenChangeNotifier>().landscapeHeightTall =
+        widget.height > 500;
+    final double directoryListHeight =
+        context.read<MainScreenChangeNotifier>().landscapeHeightTall
+            ? 200
+            : 100;
+
+    return Container(
+      width: double.infinity,
+      height: widget.height,
+      child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            height: height,
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    TopBarWithSearch(
-                      height: height / 3,
-                      width: width,
-                    ),
+          ColoredBoxWithFlag(
+            width: widget.width,
+            height: widget.height / 2,
+            textAlign: AnAlignment.center,
+          ),
+          TopBarWithSearch(
+            width: widget.width,
+          ),
+          if (directory.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(
+                vertical:
+                    context.read<MainScreenChangeNotifier>().landscapeHeightTall
+                        ? 30.0
+                        : 10,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!closeTopController)
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 30.0,
+                        horizontal: 16.0,
+                        vertical: 5.0,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 8.0,
-                            ),
-                            child: (directory.isNotEmpty)
-                                ? const Text("Folders")
-                                : Container(),
-                          ),
-                          SizedBox(
-                            height: 200,
-                            width: double.infinity,
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                left: 30.0,
-                                top: 30.0,
-                              ),
-                              child: ListView.builder(
-                                itemCount: directory.length,
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return ListFileItemLarge(
-                                    file: directory[index],
-                                    dir: Directory(directory[index].path),
-                                  );
-                                },
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 8.0,
-                            ),
-                            child: (files.isNotEmpty)
-                                ? const Text("Files")
-                                : Container(),
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: files.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return ListVideoItem(
-                                  height: height,
-                                  file: listItems[index],
-                                  dir: Directory(listItems[index].path),
-                                );
-                              },
-                            ),
-                          )
-                        ],
+                      child: (directory.isNotEmpty)
+                          ? const Text("Folders")
+                          : Container(),
+                    )
+                  else
+                    Container(),
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: closeTopController ? 0 : 1,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: widget.width,
+                      height: closeTopController ? 0 : directoryListHeight,
+                      alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: 30.0,
+                          top: context
+                                  .read<MainScreenChangeNotifier>()
+                                  .landscapeHeightTall
+                              ? 30.0
+                              : 10.0,
+                        ),
+                        child: ListView.builder(
+                          itemCount: directory.length,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (BuildContext context, int index) {
+                            return ListFileItemLarge(
+                              file: directory[index],
+                              dir: Directory(directory[index].path),
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ],
+                  )
+                ],
+              ),
+            )
+          else
+            Container(),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: (files.isNotEmpty) ? const Text("Files") : Container(),
                 ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: _controller,
+                    itemCount: files.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListVideoItem(
+                        height: widget.height,
+                        file: widget.listItems[index],
+                        dir: Directory(widget.listItems[index].path),
+                      );
+                    },
+                  ),
+                )
               ],
             ),
-          )
+          ),
         ],
       ),
     );
