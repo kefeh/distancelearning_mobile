@@ -32,7 +32,6 @@ class SmallLayout extends StatelessWidget {
                 Column(
                   children: [
                     TopBarWithSearch(
-                      height: height / 6,
                       width: width,
                     ),
                     Expanded(

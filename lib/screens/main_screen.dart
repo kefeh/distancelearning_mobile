@@ -31,22 +31,24 @@ class MainWidget extends StatelessWidget {
           return Future.value(false);
         }
       },
-      child: Scaffold(
-        backgroundColor: const Color.fromRGBO(244, 249, 240, 1),
-        resizeToAvoidBottomInset: false,
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            return PageView(
-              children: [
-                if (constraints.maxWidth < 600)
-                  SmallLayout(
-                      height: height, width: width, listItems: listItems)
-                else
-                  LargeLayout(
-                      height: height, width: width, listItems: listItems)
-              ],
-            );
-          },
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: const Color.fromRGBO(244, 249, 240, 1),
+          resizeToAvoidBottomInset: false,
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return PageView(
+                children: [
+                  if (constraints.maxWidth < 600)
+                    SmallLayout(
+                        height: height, width: width, listItems: listItems)
+                  else
+                    LargeLayout(
+                        height: height, width: width, listItems: listItems)
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

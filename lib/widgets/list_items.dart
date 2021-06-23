@@ -1,13 +1,14 @@
 import 'dart:io';
 
-import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
-import 'package:distancelearning_mobile/utils/files.dart';
-import 'package:distancelearning_mobile/views/video_player.dart';
-import 'package:distancelearning_mobile/widgets/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+
+import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
+import 'package:distancelearning_mobile/utils/files.dart';
+import 'package:distancelearning_mobile/views/video_player.dart';
+import 'package:distancelearning_mobile/widgets/helpers.dart';
 
 class ListFIleItem extends StatelessWidget {
   const ListFIleItem(
@@ -31,7 +32,6 @@ class ListFIleItem extends StatelessWidget {
         },
         child: BoxWithShadow(
           width: double.infinity,
-          height: height / 10,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -79,33 +79,53 @@ class ListFileItemLarge extends StatelessWidget {
         onTap: () {
           context.read<MainScreenChangeNotifier>().setFiles(dir.path);
         },
-        child: Container(
-          height: 100,
-          width: 200,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.0),
-            color: const Color.fromRGBO(70, 137, 8, 0.08),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.folder_rounded,
-                size: 80,
-                color: Color.fromRGBO(107, 123, 250, 0.7),
+        child: FittedBox(
+          fit: BoxFit.fill,
+          // alignment: Alignment.topCenter,
+          child: Container(
+            // height: heightTall ? 100 : 50,
+            width: context.read<MainScreenChangeNotifier>().landscapeHeightTall
+                ? 200
+                : 100,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.0),
+              color: const Color.fromRGBO(70, 137, 8, 0.08),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.folder_rounded,
+                    size: context
+                            .read<MainScreenChangeNotifier>()
+                            .landscapeHeightTall
+                        ? 80
+                        : 40,
+                    color: const Color.fromRGBO(107, 123, 250, 0.7),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: context
+                              .read<MainScreenChangeNotifier>()
+                              .landscapeHeightTall
+                          ? 150
+                          : 75,
+                      child: Text(
+                        file.path.split("/").last,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  )
+                ],
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              SizedBox(
-                width: 150,
-                child: Text(
-                  file.path.split("/").last,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              )
-            ],
+            ),
           ),
         ),
       ),
@@ -168,7 +188,6 @@ class _ListVideoItemState extends State<ListVideoItem> {
         },
         child: BoxWithShadow(
           width: double.infinity,
-          height: widget.height / 10,
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 class MainScreenChangeNotifier extends ChangeNotifier {
   late List<FileSystemEntity> _files = [];
   late Map<String, dynamic> _parent = {};
+  late bool landscapeHeightTall = false;
 
   List<FileSystemEntity> get files => _files;
   Map<String, dynamic> get parent => _parent;

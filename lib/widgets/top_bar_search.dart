@@ -6,24 +6,23 @@ import 'package:provider/provider.dart';
 class TopBarWithSearch extends StatelessWidget {
   const TopBarWithSearch({
     Key? key,
-    required this.height,
     required this.width,
   }) : super(key: key);
 
-  final double height;
   final double width;
 
   @override
   Widget build(BuildContext context) {
     final data = context.watch<MainScreenChangeNotifier>().parent;
     return BoxWithShadow(
-      height: height,
       width: width,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8.0,
-          vertical: 16.0,
-        ),
+        padding: context.read<MainScreenChangeNotifier>().landscapeHeightTall
+            ? const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 16.0,
+              )
+            : const EdgeInsets.all(8.0),
         child: Column(
           children: [
             Row(
@@ -37,7 +36,7 @@ class TopBarWithSearch extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "${(data["children"] != null) ? data["children"] : 0} Folders",
+                  "${(data["children"] != null) ? data["children"] : 0} Items",
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w300,
