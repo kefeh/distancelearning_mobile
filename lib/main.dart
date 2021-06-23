@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         locale: DevicePreview.locale(context), // Add the locale here
         builder: DevicePreview.appBuilder,
-        title: 'Flutter Demo',
+        title: 'Distance Learning',
         initialRoute: Splash.routeName,
         routes: {
           Splash.routeName: (context) => const Splash(),
