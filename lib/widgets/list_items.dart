@@ -156,6 +156,8 @@ class _ListVideoItemState extends State<ListVideoItem> {
   void initState() {
     super.initState();
     videoFile = File(widget.dir.path);
+    //TODO: Consider implementing the get of thumnails just before the file is
+    //encrypted so that we can use it to identify and place the thumbnail
     // getThumbnail(widget.dir.path).then((value) => {
     //       setState(() {
     //         thumbnailFile = File(value);
@@ -208,15 +210,16 @@ class _ListVideoItemState extends State<ListVideoItem> {
                         decoration: BoxDecoration(
                             color: const Color.fromRGBO(107, 123, 250, 0.7),
                             borderRadius: BorderRadius.circular(20)),
-                        child: false
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.file(
-                                  thumbnailFile!,
-                                  fit: BoxFit.fill,
-                                ),
-                              )
-                            : const Icon(Icons.video_collection_outlined),
+                        child:
+                            false //TODO: After handling the thumnail, evaluate this
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.file(
+                                      thumbnailFile!,
+                                      fit: BoxFit.fill,
+                                    ),
+                                  )
+                                : const Icon(Icons.video_collection_outlined),
                       ),
                       const SizedBox(
                         width: 15,

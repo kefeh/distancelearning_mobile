@@ -27,6 +27,7 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
 }
 
 String basename(String path) {
+  //TODO: consider removing the extention from the basename
   return path.split("/").last;
 }
 
