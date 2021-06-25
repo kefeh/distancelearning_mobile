@@ -31,7 +31,8 @@ class _SplashState extends State<Splash> {
   Future<void> makeInitialFileRequest() async {
     final PermissionStatus filePermission = await Permission.storage.status;
     if (filePermission.isGranted) {
-      Provider.of<MainScreenChangeNotifier>(context, listen: false).setFiles();
+      Provider.of<MainScreenChangeNotifier>(context, listen: false)
+          .setFiles(null);
       Navigator.pushReplacementNamed(
         context,
         MainWidget.routeName,

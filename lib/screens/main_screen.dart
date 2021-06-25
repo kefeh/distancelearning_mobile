@@ -27,7 +27,9 @@ class MainWidget extends StatelessWidget {
         if (parent['dir'].path == dirPath) {
           return Future.value(true);
         } else {
-          context.read<MainScreenChangeNotifier>().setFiles(parentDir);
+          context
+              .read<MainScreenChangeNotifier>()
+              .setFiles(parentDir, back: true);
           return Future.value(false);
         }
       },
@@ -37,9 +39,11 @@ class MainWidget extends StatelessWidget {
           resizeToAvoidBottomInset: false,
           body: LayoutBuilder(
             builder: (context, constraints) {
+              context.read<MainScreenChangeNotifier>().largeScreen =
+                  constraints.maxWidth > 600;
               return PageView(
                 children: [
-                  if (constraints.maxWidth < 600)
+                  if (!context.read<MainScreenChangeNotifier>().largeScreen)
                     SmallLayout(
                         height: height, width: width, listItems: listItems)
                   else
