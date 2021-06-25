@@ -86,7 +86,6 @@ class _NavCrumState extends State<NavCrum> {
         curve: Curves.easeOut,
         duration: const Duration(milliseconds: 300),
       );
-      print(_controller.position.maxScrollExtent);
     }
   }
 

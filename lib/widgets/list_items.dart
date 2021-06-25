@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:distancelearning_mobile/utils/fileEncryptionDecryption.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -155,12 +156,11 @@ class _ListVideoItemState extends State<ListVideoItem> {
   void initState() {
     super.initState();
     videoFile = File(widget.dir.path);
-    getThumbnail(widget.dir.path).then((value) => {
-          setState(() {
-            thumbnailFile = File(value);
-          })
-        });
-    _videoController = VideoPlayerController.file(videoFile);
+    // getThumbnail(widget.dir.path).then((value) => {
+    //       setState(() {
+    //         thumbnailFile = File(value);
+    //       })
+    //     });
   }
 
   @override
@@ -177,7 +177,10 @@ class _ListVideoItemState extends State<ListVideoItem> {
         horizontal: 16.0,
       ),
       child: GestureDetector(
-        onTap: () {
+        onTap: () async {
+          final File mp4VideoFile =
+              File(await EncryptDecrypt().decryptFile(videoFile.path));
+          _videoController = VideoPlayerController.file(mp4VideoFile);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -205,7 +208,7 @@ class _ListVideoItemState extends State<ListVideoItem> {
                         decoration: BoxDecoration(
                             color: const Color.fromRGBO(107, 123, 250, 0.7),
                             borderRadius: BorderRadius.circular(20)),
-                        child: thumbnailFile != null
+                        child: false
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
                                 child: Image.file(

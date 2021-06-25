@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:distancelearning_mobile/utils/fileEncryptionDecryption.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thumbnails/thumbnails.dart';
@@ -12,6 +13,9 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
   for (final FileSystemEntity file in tempFile) {
     if (!basename(file.path).startsWith(".")) {
       if (file is File && basename(file.path).split(".").last == "mp4") {
+        files.add(File(await EncryptDecrypt.encrypt(file.path)));
+      }
+      if (file is File && basename(file.path).split(".").last == "aes") {
         files.add(file);
       }
       if (file is Directory) {
