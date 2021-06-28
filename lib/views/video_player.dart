@@ -61,6 +61,7 @@ class _VideoItemsState extends State<VideoItems> {
         return shouldPop;
       },
       child: Scaffold(
+        backgroundColor: Colors.black,
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Stack(
