@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoItems extends StatefulWidget {
-  //TODO: Consider using a black scaffold for the video player
   final VideoPlayerController videoPlayerController;
   final bool? looping;
   final bool? autoplay;
