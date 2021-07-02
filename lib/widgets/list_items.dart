@@ -150,15 +150,13 @@ class ListVideoItem extends StatefulWidget {
 class _ListVideoItemState extends State<ListVideoItem> {
   late VideoPlayerController _videoController;
   late File videoFile;
-  late File? thumbnailFile;
+  File? thumbnailFile;
 
   @override
   void initState() {
     super.initState();
     videoFile = File(widget.dir.path);
     setThumbnailFile(widget.dir.path);
-    //TODO: Consider implementing the get of thumnails just before the file is
-    //encrypted so that we can use it to identify and place the thumbnail
   }
 
   Future<void> setThumbnailFile(String filePath) async {
@@ -190,8 +188,10 @@ class _ListVideoItemState extends State<ListVideoItem> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  VideoItems(videoPlayerController: _videoController),
+              builder: (context) => VideoItems(
+                videoPlayerController: _videoController,
+                fileToBePlayed: mp4VideoFile,
+              ),
             ),
           );
         },
@@ -214,8 +214,7 @@ class _ListVideoItemState extends State<ListVideoItem> {
                         decoration: BoxDecoration(
                             color: const Color.fromRGBO(107, 123, 250, 0.7),
                             borderRadius: BorderRadius.circular(20)),
-                        child: thumbnailFile !=
-                                null //TODO: After handling the thumnail, evaluate this
+                        child: thumbnailFile != null
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
                                 child: Image.file(

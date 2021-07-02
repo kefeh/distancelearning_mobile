@@ -1,14 +1,18 @@
+import 'dart:io';
+
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoItems extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
+  final File fileToBePlayed;
   final bool? looping;
   final bool? autoplay;
 
   const VideoItems({
     required this.videoPlayerController,
+    required this.fileToBePlayed,
     this.looping,
     this.autoplay,
     Key? key,
@@ -47,6 +51,7 @@ class _VideoItemsState extends State<VideoItems> {
   @override
   void dispose() {
     super.dispose();
+    widget.fileToBePlayed.deleteSync();
     _chewieController.dispose();
   }
 

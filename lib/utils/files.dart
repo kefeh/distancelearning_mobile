@@ -7,34 +7,45 @@ import 'package:thumbnails/thumbnails.dart';
 
 Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
   final String newPath = path ?? await getMainDirPath();
+  final String newOtherPath =
+      path ?? (await getApplicationDocumentsDirectory()).path;
   final List<FileSystemEntity> files = [];
   final Directory dir = Directory(newPath);
+  final Directory otherDir = Directory(newOtherPath);
   final List<FileSystemEntity> tempFile = dir.listSync();
   for (final FileSystemEntity file in tempFile) {
     if (!basename(file.path, removeExtension: false).startsWith(".")) {
-      // if (file is File && basename(file.path).split(".").last == "mp4") {
-      //   await createThumbnail(file.path);
-      //   files.add(File(await EncryptDecrypt.encrypt(file.path)));
-      // }
-      final appDocDir = await getApplicationDocumentsDirectory();
-      // var s = await createThumbnail(file.path);
-      // print(s);
-
+      print(file.path);
       if (file is File &&
           basename(file.path, removeExtension: false).split(".").last ==
               "mp4") {
-        files.add(file);
-      }
-      if (file is Directory) {
-        files.add(file);
+        final String? thumbnail = await getAThumbnail(file.path);
+        if (thumbnail == null) await createThumbnail(file.path);
+        await EncryptDecrypt.encrypt(file.path);
       }
     }
   }
+
+  final List<FileSystemEntity> realFile = otherDir.listSync();
+  for (final FileSystemEntity afile in realFile) {
+    // afile.deleteSync(recursive: true);
+    if (afile is File &&
+        basename(afile.path, removeExtension: false).split(".").last == "aes") {
+      files.add(afile);
+    }
+    if (afile is File &&
+        basename(afile.path, removeExtension: false).split(".").last == "mp4") {
+      files.add(afile);
+    }
+    if (afile is Directory) {
+      files.add(afile);
+    }
+  }
+
   return files;
 }
 
 String basename(String path, {bool removeExtension = true}) {
-  //TODO: consider removing the extention from the basename
   final String aBasename = path.split("/").last;
   if (aBasename.startsWith(".")) {
     return aBasename;
@@ -89,5 +100,7 @@ Future<String> createThumbnail(String videoPathUrl) async {
       videoFile: videoPathUrl,
       imageType: ThumbFormat.PNG,
       quality: 30);
+  print("Thumbnails here ************************************");
+  print(thumb);
   return thumb;
 }
