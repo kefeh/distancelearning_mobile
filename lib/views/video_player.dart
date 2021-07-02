@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoItems extends StatefulWidget {
-  final VideoPlayerController videoPlayerController;
-  final File fileToBePlayed;
+  final Future<String> fileToBePlayed;
   final bool? looping;
   final bool? autoplay;
 
   const VideoItems({
-    required this.videoPlayerController,
     required this.fileToBePlayed,
     this.looping,
     this.autoplay,
@@ -26,32 +24,19 @@ class _VideoItemsState extends State<VideoItems> {
   late ChewieController _chewieController;
 
   bool shouldPop = true;
+  late File toDelete;
+  late VideoPlayerController videoPlayerController;
 
   @override
   void initState() {
     super.initState();
-    _chewieController = ChewieController(
-      videoPlayerController: widget.videoPlayerController,
-      aspectRatio: widget.videoPlayerController.value.aspectRatio,
-      autoInitialize: true,
-      autoPlay: widget.autoplay ?? true,
-      looping: widget.looping ?? false,
-      errorBuilder: (context, errorMessage) {
-        return Center(
-          child: Text(
-            errorMessage,
-            style: const TextStyle(color: Colors.white),
-          ),
-        );
-      },
-      allowedScreenSleep: false,
-    );
   }
 
   @override
   void dispose() {
     super.dispose();
-    widget.fileToBePlayed.deleteSync();
+    print("file deleted");
+    toDelete.deleteSync();
     _chewieController.dispose();
   }
 
@@ -59,8 +44,8 @@ class _VideoItemsState extends State<VideoItems> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (widget.videoPlayerController.value.isPlaying) {
-          widget.videoPlayerController.pause();
+        if (videoPlayerController.value.isPlaying) {
+          videoPlayerController.pause();
         }
         return shouldPop;
       },
@@ -68,12 +53,46 @@ class _VideoItemsState extends State<VideoItems> {
         backgroundColor: Colors.black,
         body: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Stack(
-            children: [
-              Chewie(
-                controller: _chewieController,
-              ),
-            ],
+          child: FutureBuilder<String>(
+            future: widget.fileToBePlayed,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                videoPlayerController =
+                    VideoPlayerController.file(File(snapshot.data!));
+                _chewieController = ChewieController(
+                  videoPlayerController: videoPlayerController,
+                  aspectRatio: videoPlayerController.value.aspectRatio,
+                  autoInitialize: true,
+                  autoPlay: widget.autoplay ?? true,
+                  looping: widget.looping ?? false,
+                  errorBuilder: (context, errorMessage) {
+                    return Center(
+                      child: Text(
+                        errorMessage,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  },
+                  allowedScreenSleep: false,
+                );
+
+                toDelete = File(snapshot.data!);
+
+                return Stack(
+                  children: [
+                    Chewie(
+                      controller: _chewieController,
+                    ),
+                  ],
+                );
+              }
+              return Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    color: Colors.black,
+                    child: const CircularProgressIndicator(),
+                  ));
+            },
           ),
         ),
       ),

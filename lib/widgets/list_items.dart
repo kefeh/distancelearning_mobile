@@ -181,16 +181,12 @@ class _ListVideoItemState extends State<ListVideoItem> {
         horizontal: 16.0,
       ),
       child: GestureDetector(
-        onTap: () async {
-          final File mp4VideoFile =
-              File(await EncryptDecrypt().decryptFile(videoFile.path));
-          _videoController = VideoPlayerController.file(mp4VideoFile);
+        onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => VideoItems(
-                videoPlayerController: _videoController,
-                fileToBePlayed: mp4VideoFile,
+                fileToBePlayed: EncryptDecrypt().decryptFile(videoFile.path),
               ),
             ),
           );
