@@ -247,7 +247,7 @@ class NameWithDate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String name = file.path.split("/").last;
+    final String name = basename(file.path);
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

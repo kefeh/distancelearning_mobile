@@ -28,18 +28,18 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
 
   final List<FileSystemEntity> realFile = otherDir.listSync();
   for (final FileSystemEntity afile in realFile) {
-    // afile.deleteSync(recursive: true);
-    if (afile is File &&
-        basename(afile.path, removeExtension: false).split(".").last == "aes") {
-      files.add(afile);
-    }
-    if (afile is File &&
-        basename(afile.path, removeExtension: false).split(".").last == "mp4") {
-      files.add(afile);
-    }
-    if (afile is Directory) {
-      files.add(afile);
-    }
+    afile.deleteSync(recursive: true);
+    // if (afile is File &&
+    //     basename(afile.path, removeExtension: false).split(".").last == "aes") {
+    //   files.add(afile);
+    // }
+    // if (afile is File &&
+    //     basename(afile.path, removeExtension: false).split(".").last == "mp4") {
+    //   files.add(afile);
+    // }
+    // if (afile is Directory) {
+    //   files.add(afile);
+    // }
   }
 
   return files;
