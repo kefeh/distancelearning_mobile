@@ -160,7 +160,7 @@ class _ListVideoItemState extends State<ListVideoItem> {
   }
 
   Future<void> setThumbnailFile(String filePath) async {
-    final String? thumbnail = await getAThumbnail(widget.dir.path);
+    final String? thumbnail = await getAThumbnail(filePath);
     setState(() {
       thumbnailFile =
           (thumbnail != null ? File(thumbnail) : thumbnail) as File?;
@@ -247,7 +247,7 @@ class NameWithDate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String name = file.path.split("/").last;
+    final String name = basename(file.path);
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
