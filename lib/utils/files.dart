@@ -15,7 +15,7 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
   final List<FileSystemEntity> tempFile = dir.listSync();
   for (final FileSystemEntity file in tempFile) {
     if (!basename(file.path, removeExtension: false).startsWith(".")) {
-      print(file.path);
+      // print(file.path);
       if (file is File &&
           basename(file.path, removeExtension: false).split(".").last ==
               "mp4") {
@@ -51,9 +51,12 @@ String basename(String path, {bool removeExtension = true}) {
     return aBasename;
   }
   if (removeExtension) {
-    final List listBasename = aBasename.split(".");
-    listBasename.removeLast();
-    return listBasename.join(".");
+    List listBasename = aBasename.split(".");
+    if (listBasename.length >= 2) {
+      listBasename.removeLast();
+    }
+    listBasename = listBasename.join(".").split("_file");
+    return listBasename[0] as String;
   }
   return aBasename;
 }
@@ -85,8 +88,18 @@ Future<String> getThumbnail(String videoPathUrl) async {
 
 Future<String?> getAThumbnail(String videoPathUrl) async {
   final appDocDir = await getApplicationDocumentsDirectory();
-  final List<FileSystemEntity> thumbnailFile = appDocDir
+
+  List<FileSystemEntity>? thumbnailFile = appDocDir
       .listSync()
+      .where((element) => element.path.split(".").last == "png")
+      .toList();
+  for (final file in thumbnailFile) {
+    print(basename(file.path));
+    print(basename(videoPathUrl));
+    print(basename(file.path) == basename(videoPathUrl));
+    print("mmmmmmmmmmmmmmmmmmmmmmm");
+  }
+  thumbnailFile = thumbnailFile
       .where((element) => basename(element.path) == basename(videoPathUrl))
       .toList();
   return thumbnailFile.isNotEmpty ? thumbnailFile[0].path : null;
@@ -100,7 +113,5 @@ Future<String> createThumbnail(String videoPathUrl) async {
       videoFile: videoPathUrl,
       imageType: ThumbFormat.PNG,
       quality: 30);
-  print("Thumbnails here ************************************");
-  print(thumb);
   return thumb;
 }
