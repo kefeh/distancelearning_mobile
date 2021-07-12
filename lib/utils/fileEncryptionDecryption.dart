@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:convert' as convert;
 import 'dart:io';
 
 import 'package:distancelearning_mobile/utils/files.dart';
@@ -15,33 +15,54 @@ class EncryptDecrypt {
     final mainPath = await getMainDirPath();
     final relPathToFile = filePath.split(mainPath).last;
     final File inFile = File(filePath);
-    final String outFileRelPath = "${relPathToFile.split('.').first}.aes";
-    final String outFilePath = '${appDocDir.path}/$outFileRelPath';
 
-    final File outFile = File(outFilePath);
-
-    final bool outFileExists = await outFile.exists();
-
-    if (!outFileExists) {
-      await outFile.create();
+    final somePath = "${relPathToFile.split('.').first}_file";
+    final String mPath = "${appDocDir.path}/$somePath";
+    final Directory outDir = Directory(mPath);
+    final bool dExists = await outDir.exists();
+    if (!dExists) {
+      await outDir.create();
     } else {
-      print("encrypted");
-      return outFilePath;
+      return outDir.path;
     }
-    final videoFileContents = await inFile.readAsString(encoding: latin1);
+    final videoFileContents =
+        await inFile.readAsString(encoding: convert.latin1);
 
-    final key = Key.fromUtf8("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    final iv = IV.fromLength(16);
+    final v = (videoFileContents.length / 10).floor();
+    for (var i = 0; i < videoFileContents.length; i = i + v) {
+      final String outFilePath = '$mPath/$i.aes';
 
-    final encrypter = Encrypter(AES(key));
-    final encrypted = encrypter.encrypt(videoFileContents, iv: iv);
-    await outFile.writeAsBytes(encrypted.bytes);
-    return outFilePath;
+      final File outFile = File(outFilePath);
+
+      final bool outFileExists = await outFile.exists();
+      if (!outFileExists) {
+        await outFile.create();
+      } else {
+        print("encrypted");
+        return outFilePath;
+      }
+
+      final key = Key.fromUtf8("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+      final iv = IV.fromLength(16);
+
+      final encrypter = Encrypter(AES(key));
+
+      List<int> x = convert.utf8.encode(videoFileContents.substring(
+          i,
+          (i + v) > videoFileContents.length
+              ? videoFileContents.length
+              : i + v));
+      final encrypted = encrypter.encryptBytes(x, iv: iv);
+      await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
+    }
+
+    print("DONE");
+
+    return 'outFilePath';
   }
 
   Future<String> decryptFile(String filePath) async {
-    final File inFile = File(filePath);
-    final String outFileName = "${basename(filePath).split('.').first}.mp4";
+    final String outFileName = "${basename(filePath)}.mp4";
     //TODO: Consider holding the decrypted file in a temporaty file and delete
     // after it is played (probably delete it during the dispose)
     final String outFilePath =
@@ -52,19 +73,28 @@ class EncryptDecrypt {
     if (!outFileExists) {
       await outFile.create();
     }
-
-    final videoFileContents = inFile.readAsBytesSync();
-
+    print("outfile created");
     final key = Key.fromUtf8("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     final iv = IV.fromLength(16);
 
     final encrypter = Encrypter(AES(key));
+    final fileDir = Directory(filePath);
+    final someFiles = fileDir.listSync();
+    for (var file in someFiles) {
+      final videoFileContents = (file as File).readAsBytesSync();
+      print("file read");
 
-    final encryptedFile = Encrypted(videoFileContents);
-    final decrypted = encrypter.decrypt(encryptedFile, iv: iv);
+      final encryptedFile = Encrypted(videoFileContents);
 
-    final decryptedBytes = latin1.encode(decrypted);
-    await outFile.writeAsBytes(decryptedBytes);
+      print("encrypter created");
+      final decrypted = encrypter.decrypt(encryptedFile, iv: iv);
+
+      print("decrypted");
+      final decryptedBytes = convert.latin1.encode(decrypted);
+      await outFile.writeAsBytes(decryptedBytes, mode: FileMode.append);
+    }
+
+    print("written to the file");
     return outFilePath;
   }
 }
