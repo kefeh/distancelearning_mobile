@@ -38,10 +38,13 @@ class _LargeLayoutState extends State<LargeLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final List<FileSystemEntity> files =
-        widget.listItems.whereType<File>().toList();
-    final List<FileSystemEntity> directory =
-        widget.listItems.whereType<Directory>().toList();
+    final List<FileSystemEntity> files = widget.listItems
+        .where((element) => element.path.split("_").last == "file")
+        .toList();
+    final List<FileSystemEntity> directory = widget.listItems
+        .whereType<Directory>()
+        .where((element) => element.path.split("_").last != "file")
+        .toList();
     context.read<MainScreenChangeNotifier>().landscapeHeightTall =
         widget.height > 500;
     final double directoryListHeight =
@@ -138,8 +141,8 @@ class _LargeLayoutState extends State<LargeLayout> {
                     itemBuilder: (BuildContext context, int index) {
                       return ListVideoItem(
                         height: widget.height,
-                        file: widget.listItems[index],
-                        dir: Directory(widget.listItems[index].path),
+                        file: files[index],
+                        dir: Directory(files[index].path),
                       );
                     },
                   ),
