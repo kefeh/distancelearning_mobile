@@ -1,4 +1,5 @@
-import 'dart:io';
+// @dart=2.9
+
 import 'package:device_preview/device_preview.dart';
 import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
 import 'package:distancelearning_mobile/screens/main_screen.dart';
