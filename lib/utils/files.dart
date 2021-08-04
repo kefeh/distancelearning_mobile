@@ -1,18 +1,21 @@
 import 'dart:io';
 
-import 'package:distancelearning_mobile/utils/fileEncryptionDecryption.dart';
+import 'package:distancelearning_mobile/utils/file_encryption_decryption.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thumbnails/thumbnails.dart';
 
 Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
-  final String newPath = path ?? await getMainDirPath();
-  final String newOtherPath =
-      path ?? (await getApplicationDocumentsDirectory()).path;
+  final String mainDir = await getMainDirPath();
+  final String newPath = path ?? mainDir;
+  final Directory docDir = await getApplicationDocumentsDirectory();
+  final String newOtherPath = path ?? docDir.path;
   final List<FileSystemEntity> files = [];
   final Directory dir = Directory(newPath);
   final Directory otherDir = Directory(newOtherPath);
   final List<FileSystemEntity> tempFile = dir.listSync();
+  final Worker worker = Worker();
+  await worker.isReady;
   for (final FileSystemEntity file in tempFile) {
     if (!basename(file.path, removeExtension: false).startsWith(".")) {
       // print(file.path);
@@ -22,7 +25,7 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
         print(file.path);
         final String? thumbnail = await getAThumbnail(file.path);
         if (thumbnail == null) await createThumbnail(file.path);
-        await EncryptDecrypt.encrypt(file.path);
+        await EncryptDecrypt.encrypt(file.path, worker: worker);
       }
     }
   }
@@ -43,6 +46,7 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
       files.add(afile);
     }
   }
+  worker.dispose();
 
   return files;
 }

@@ -10,7 +10,7 @@ import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path_provider/path_provider.dart';
 
 class EncryptDecrypt {
-  static Future<String> encrypt(String filePath) async {
+  static Future<String> encrypt(String filePath, {Worker? worker}) async {
     //TODO: Encryption fails with large files, try breaking down the file into
     //chunks, encrypting them and merging them, then do the same thing when
     // decrypting the file.
@@ -29,14 +29,7 @@ class EncryptDecrypt {
     } else {
       return outDir.path;
     }
-    final videoFileContents =
-        await inFile.readAsString(encoding: convert.latin1);
-    final key = Key.fromUtf8("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    final iv = IV.fromLength(16);
-
-    final encrypter = Encrypter(AES(key));
-    final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
-
+    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
     final arguments = [
       "-i",
       filePath,
@@ -52,6 +45,30 @@ class EncryptDecrypt {
         .executeWithArguments(arguments)
         .then((rc) => print("FFmpeg process exited with rc $rc"));
 
+    worker == null
+        ? await encryptFile(mPath, inFile: inFile)
+        : worker.encrypt({
+            "filePath": mPath,
+            "inFile": inFile,
+          });
+
+    print("DONE");
+
+    return 'outFilePath';
+  }
+
+  static Future<String> encryptFile(String mPath, {File? inFile}) async {
+    //TODO: Encryption fails with large files, try breaking down the file into
+    //chunks, encrypting them and merging them, then do the same thing when
+    // decrypting the file.
+    // Also consider compressing the file to reduce the size (NOT very Important)
+    final videoFileContents =
+        await inFile!.readAsString(encoding: convert.latin1);
+    final key = Key.fromUtf8("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    final iv = IV.fromLength(16);
+
+    final encrypter = Encrypter(AES(key));
+
     try {
       final x = convert.utf8.encode(videoFileContents);
       final String outFilePath = '$mPath/0.aes';
@@ -63,7 +80,7 @@ class EncryptDecrypt {
         await outFile.create();
       } else {
         print("encrypted");
-        return outFilePath;
+        return "somePath";
       }
 
       final encrypted = encrypter.encryptBytes(x, iv: iv);
@@ -81,7 +98,7 @@ class EncryptDecrypt {
           await outFile.create();
         } else {
           print("encrypted");
-          return outFilePath;
+          return "somepath";
         }
 
         List<int> x = convert.utf8.encode(videoFileContents.substring(
@@ -93,10 +110,7 @@ class EncryptDecrypt {
         await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
       }
     }
-
-    print("DONE");
-
-    return 'outFilePath';
+    return "somePath";
   }
 
   static Future<String> decryptFile(String filePath) async {
@@ -159,16 +173,25 @@ class Worker {
   late Isolate _isolate;
   final _isolateReady = Completer<void>();
   late Completer<String> _decryptedPath;
+  late Completer<String> _encryptedPath;
   Worker() {
     init();
   }
 
-  Future<String> decrypt(String filePath) async {
-    _sendPort.send(filePath);
+  Future<String> decrypt(Map<String, dynamic> fileInfo) async {
+    _sendPort.send(fileInfo);
     _decryptedPath = Completer<String>();
-    var k = await _decryptedPath.future;
+    final k = await _decryptedPath.future;
     print(k);
     return _decryptedPath.future;
+  }
+
+  Future<String> encrypt(Map<String, dynamic> fileInfo) async {
+    _sendPort.send(fileInfo);
+    _encryptedPath = Completer<String>();
+    final k = await _encryptedPath.future;
+    print(k);
+    return _encryptedPath.future;
   }
 
   Future<void> init() async {
@@ -202,7 +225,12 @@ class Worker {
     final receivePort = ReceivePort();
 
     receivePort.listen((message) async {
-      final pathString = await EncryptDecrypt.decryptFile(message as String);
+      final pathString = message["type"] == 'decrypt'
+          ? await EncryptDecrypt.decryptFile(message["filePath"] as String)
+          : await EncryptDecrypt.encryptFile(
+              message["filePath"] as String,
+              inFile: message["inFile"] as File,
+            );
       print(
           "final pathString = EncryptDecrypt.decryptFile(message as String);");
       print(pathString);

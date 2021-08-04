@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:distancelearning_mobile/utils/fileEncryptionDecryption.dart';
+import 'package:distancelearning_mobile/utils/file_encryption_decryption.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -190,7 +190,10 @@ class _ListVideoItemState extends State<ListVideoItem> {
   Future<String> runIsolate() async {
     // final String s = await compute(EncryptDecrypt.decryptFile, videoFile.path);
     // final String s = await EncryptDecrypt.decryptFile(videoFile.path);
-    final String s = await worker.decrypt(videoFile.path);
+    final String s = await worker.decrypt({
+      'filePath': videoFile.path,
+      'type': 'decrypt',
+    });
     return s;
   }
 
