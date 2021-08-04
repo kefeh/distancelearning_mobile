@@ -8,9 +8,11 @@ class VideoItems extends StatefulWidget {
   final Future<String> fileToBePlayed;
   final bool? looping;
   final bool? autoplay;
+  final File firstFile;
 
   const VideoItems({
     required this.fileToBePlayed,
+    required this.firstFile,
     this.looping,
     this.autoplay,
     Key? key,
@@ -21,15 +23,56 @@ class VideoItems extends StatefulWidget {
 }
 
 class _VideoItemsState extends State<VideoItems> {
-  late ChewieController _chewieController;
+  ChewieController? _chewieController;
+  ChewieController? _newController;
 
   bool shouldPop = true;
   late File toDelete;
+  late String s;
   late VideoPlayerController videoPlayerController;
+  late VideoPlayerController newPlayerController;
 
   @override
   void initState() {
+    init();
     super.initState();
+  }
+
+  Future<void> init() async {
+    setState(() {
+      newPlayerController = VideoPlayerController.file(widget.firstFile);
+      _newController = setController(newPlayerController);
+    });
+    final time = Stopwatch()..start();
+    s = await widget.fileToBePlayed;
+    setState(() {
+      videoPlayerController = VideoPlayerController.file(File(s));
+      _chewieController =
+          setController(videoPlayerController, startAt: time.elapsed);
+      time.stop();
+      toDelete = File(s);
+    });
+  }
+
+  ChewieController setController(VideoPlayerController vidController,
+      {Duration? startAt}) {
+    return ChewieController(
+      videoPlayerController: vidController,
+      aspectRatio: vidController.value.aspectRatio,
+      autoInitialize: true,
+      autoPlay: widget.autoplay ?? true,
+      looping: widget.looping ?? false,
+      errorBuilder: (context, errorMessage) {
+        return Center(
+          child: Text(
+            errorMessage,
+            style: const TextStyle(color: Colors.white),
+          ),
+        );
+      },
+      allowedScreenSleep: false,
+      startAt: startAt,
+    );
   }
 
   @override
@@ -37,7 +80,7 @@ class _VideoItemsState extends State<VideoItems> {
     super.dispose();
     print("file deleted");
     toDelete.deleteSync();
-    _chewieController.dispose();
+    _chewieController != null ? _chewieController!.dispose() : print("s");
   }
 
   @override
@@ -53,47 +96,21 @@ class _VideoItemsState extends State<VideoItems> {
         backgroundColor: Colors.black,
         body: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: FutureBuilder<String>(
-            future: widget.fileToBePlayed,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                videoPlayerController =
-                    VideoPlayerController.file(File(snapshot.data!));
-                _chewieController = ChewieController(
-                  videoPlayerController: videoPlayerController,
-                  aspectRatio: videoPlayerController.value.aspectRatio,
-                  autoInitialize: true,
-                  autoPlay: widget.autoplay ?? true,
-                  looping: widget.looping ?? false,
-                  errorBuilder: (context, errorMessage) {
-                    return Center(
-                      child: Text(
-                        errorMessage,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  },
-                  allowedScreenSleep: false,
-                );
-
-                toDelete = File(snapshot.data!);
-
-                return Stack(
+          child: (_chewieController != null)
+              ? Stack(
                   children: [
                     Chewie(
-                      controller: _chewieController,
+                      controller: _chewieController!,
                     ),
                   ],
-                );
-              }
-              return Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    color: Colors.black,
-                    child: const CircularProgressIndicator(),
-                  ));
-            },
-          ),
+                )
+              : Stack(
+                  children: [
+                    Chewie(
+                      controller: _newController!,
+                    ),
+                  ],
+                ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:distancelearning_mobile/utils/fileEncryptionDecryption.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -151,17 +152,29 @@ class _ListVideoItemState extends State<ListVideoItem> {
   late VideoPlayerController _videoController;
   late File videoFile;
   File? thumbnailFile;
+  Worker worker = Worker();
+  late File firstFile;
 
   @override
   void initState() {
     super.initState();
     videoFile = File(widget.dir.path);
+
+    print("videoFile = File(widget.dir.path);");
+    print(videoFile);
     setThumbnailFile(widget.dir.path);
   }
 
   Future<void> setThumbnailFile(String filePath) async {
+    await worker.isReady;
     final String? thumbnail = await getAThumbnail(filePath);
     setState(() {
+      firstFile = Directory(widget.dir.path)
+          .listSync()
+          .where((element) =>
+              basename((element as File).path, removeExtension: false) ==
+              "x.mp4")
+          .toList()[0] as File;
       thumbnailFile =
           (thumbnail != null ? File(thumbnail) : thumbnail) as File?;
     });
@@ -171,6 +184,14 @@ class _ListVideoItemState extends State<ListVideoItem> {
   void dispose() {
     super.dispose();
     _videoController.dispose();
+    worker.dispose();
+  }
+
+  Future<String> runIsolate() async {
+    // final String s = await compute(EncryptDecrypt.decryptFile, videoFile.path);
+    // final String s = await EncryptDecrypt.decryptFile(videoFile.path);
+    final String s = await worker.decrypt(videoFile.path);
+    return s;
   }
 
   @override
@@ -186,7 +207,8 @@ class _ListVideoItemState extends State<ListVideoItem> {
             context,
             MaterialPageRoute(
               builder: (context) => VideoItems(
-                fileToBePlayed: EncryptDecrypt().decryptFile(videoFile.path),
+                fileToBePlayed: runIsolate(),
+                firstFile: firstFile,
               ),
             ),
           );

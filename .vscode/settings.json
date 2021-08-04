@@ -10,5 +10,4 @@
         "**/.gitkeep": true
     },
     "explorerExclude.backup": null,
-    "dart.flutterAdditionalArgs": ["--no-sound-null-safety"],
 }

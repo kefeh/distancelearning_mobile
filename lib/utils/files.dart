@@ -19,6 +19,7 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
       if (file is File &&
           basename(file.path, removeExtension: false).split(".").last ==
               "mp4") {
+        print(file.path);
         final String? thumbnail = await getAThumbnail(file.path);
         if (thumbnail == null) await createThumbnail(file.path);
         await EncryptDecrypt.encrypt(file.path);
@@ -28,6 +29,34 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
 
   final List<FileSystemEntity> realFile = otherDir.listSync();
   for (final FileSystemEntity afile in realFile) {
+    print(afile.path);
+    // afile.deleteSync(recursive: true);
+    if (afile is File &&
+        basename(afile.path, removeExtension: false).split(".").last == "aes") {
+      files.add(afile);
+    }
+    if (afile is File &&
+        basename(afile.path, removeExtension: false).split(".").last == "mp4") {
+      files.add(afile);
+    }
+    if (afile is Directory) {
+      files.add(afile);
+    }
+  }
+
+  return files;
+}
+
+Future<List<FileSystemEntity>> getFilesAndFoldersONLY([String? path]) async {
+  final String newPath = path ?? await getMainDirPath();
+  final String newOtherPath =
+      path ?? (await getApplicationDocumentsDirectory()).path;
+  final List<FileSystemEntity> files = [];
+  final Directory dir = Directory(newPath);
+  final Directory otherDir = Directory(newOtherPath);
+  final List<FileSystemEntity> realFile = otherDir.listSync();
+  for (final FileSystemEntity afile in realFile) {
+    print(afile.path);
     // afile.deleteSync(recursive: true);
     if (afile is File &&
         basename(afile.path, removeExtension: false).split(".").last == "aes") {

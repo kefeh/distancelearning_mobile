@@ -39,7 +39,9 @@ class _LargeLayoutState extends State<LargeLayout> {
   @override
   Widget build(BuildContext context) {
     final List<FileSystemEntity> files = widget.listItems
-        .where((element) => element.path.split("_").last == "file")
+        .where((element) =>
+            element.path.split("_").last == "file" ||
+            element.path.split(".").last == "mp4")
         .toList();
     final List<FileSystemEntity> directory = widget.listItems
         .whereType<Directory>()
