@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:distancelearning_mobile/notifiers/file_setup_notifier.dart';
 import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
 import 'package:distancelearning_mobile/screens/main_screen.dart';
 import 'package:distancelearning_mobile/views/dialogs.dart';
@@ -17,6 +18,8 @@ class Splash extends StatefulWidget {
 }
 
 class _SplashState extends State<Splash> {
+  late final int numOfItems;
+  late final int numFilesMod;
   Timer startWait() {
     return Timer(
       const Duration(seconds: 2),
@@ -32,11 +35,7 @@ class _SplashState extends State<Splash> {
     final PermissionStatus filePermission = await Permission.storage.status;
     if (filePermission.isGranted) {
       Provider.of<MainScreenChangeNotifier>(context, listen: false)
-          .setFiles(null);
-      Navigator.pushReplacementNamed(
-        context,
-        MainWidget.routeName,
-      );
+          .setFiles(null, context: context);
     } else {
       final PermissionStatus status = await Permission.storage.request();
       if (status.isGranted) {
@@ -49,14 +48,17 @@ class _SplashState extends State<Splash> {
 
   @override
   void initState() {
-    super.initState();
     startWait();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
+    print("This is almost amazing then");
+    print(Provider.of<FileSetupNotifier>(context).numFilesMod ==
+        Provider.of<FileSetupNotifier>(context).numOfFiles);
     return Scaffold(
       backgroundColor: const Color(0xff468908),
       body: Stack(
@@ -73,13 +75,127 @@ class _SplashState extends State<Splash> {
               height: (height / 3) - 40,
               width: double.infinity,
               color: const Color(0xff468908),
-              child: const MainTexts(
-                align: AnAlignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const MainTexts(
+                    align: AnAlignment.center,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Encrypting videos",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+                      BlinkingText(
+                        text:
+                            " ${Provider.of<FileSetupNotifier>(context).numFilesMod} of ${Provider.of<FileSetupNotifier>(context).numOfFiles}",
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacementNamed(
+                        context,
+                        MainWidget.routeName,
+                      );
+                    },
+                    child: Container(
+                      height: 60,
+                      width: 200,
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(232, 70, 65, 80),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Continue",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+class BlinkingText extends StatefulWidget {
+  final String text;
+
+  const BlinkingText({
+    Key? key,
+    required this.text,
+  }) : super(key: key);
+  @override
+  _BlinkingTextState createState() => _BlinkingTextState();
+}
+
+class _BlinkingTextState extends State<BlinkingText>
+    with SingleTickerProviderStateMixin {
+  late Animation<Color?> animation;
+  late AnimationController controller;
+
+  @override
+  initState() {
+    super.initState();
+
+    controller = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+
+    final CurvedAnimation curve =
+        CurvedAnimation(parent: controller, curve: Curves.ease);
+
+    animation = ColorTween(begin: Colors.white, end: Colors.red).animate(curve);
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        controller.reverse();
+      } else if (status == AnimationStatus.dismissed) {
+        controller.forward();
+      }
+      setState(() {});
+    });
+
+    controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        return Text(
+          widget.text,
+          style: TextStyle(
+            color: animation.value,
+            fontSize: 27,
+          ),
+        );
+      },
+    );
+  }
+
+  dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }

@@ -13,8 +13,9 @@ class MainScreenChangeNotifier extends ChangeNotifier {
   List<FileSystemEntity> get files => _files;
   Map<String, dynamic> get parent => _parent;
 
-  Future<void> setFiles(String? dirPath, {bool back = false}) async {
-    _files = await getFilesAndFolders(dirPath);
+  Future<void> setFiles(String? dirPath,
+      {BuildContext? context, bool back = false}) async {
+    _files = await getFilesAndFolders(context: context, path: dirPath);
     final String parentPath = dirPath ??
         await getParentDirPath(_files.isNotEmpty ? _files[0].path : null);
     _parent = {

@@ -1,6 +1,7 @@
 // @dart=2.9
 
 import 'package:device_preview/device_preview.dart';
+import 'package:distancelearning_mobile/notifiers/file_setup_notifier.dart';
 import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
 import 'package:distancelearning_mobile/screens/main_screen.dart';
 import 'package:distancelearning_mobile/screens/splash.dart';
@@ -22,8 +23,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MainScreenChangeNotifier(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => MainScreenChangeNotifier()),
+        ChangeNotifierProvider(create: (context) => FileSetupNotifier()),
+      ],
       child: MaterialApp(
         locale: DevicePreview.locale(context), // Add the locale here
         builder: DevicePreview.appBuilder,

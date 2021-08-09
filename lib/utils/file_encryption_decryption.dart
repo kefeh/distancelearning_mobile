@@ -21,7 +21,7 @@ class EncryptDecrypt {
     final File inFile = File(filePath);
 
     final somePath = "${relPathToFile.split('.').first}_file";
-    final String mPath = "${appDocDir.path}/$somePath";
+    final String mPath = "${appDocDir.path}$somePath";
     final Directory outDir = Directory(mPath);
     final bool dExists = await outDir.exists();
     if (!dExists) {
@@ -44,10 +44,10 @@ class EncryptDecrypt {
     _flutterFFmpeg
         .executeWithArguments(arguments)
         .then((rc) => print("FFmpeg process exited with rc $rc"));
-
+    print(filePath);
     worker == null
         ? await encryptFile(mPath, inFile: inFile)
-        : worker.encrypt({
+        : await worker.encrypt({
             "filePath": mPath,
             "inFile": inFile,
           });
@@ -68,7 +68,8 @@ class EncryptDecrypt {
     final iv = IV.fromLength(16);
 
     final encrypter = Encrypter(AES(key));
-
+    print("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
+    print(videoFileContents.length);
     try {
       final x = convert.utf8.encode(videoFileContents);
       final String outFilePath = '$mPath/0.aes';
@@ -77,17 +78,17 @@ class EncryptDecrypt {
 
       final bool outFileExists = await outFile.exists();
       if (!outFileExists) {
+        final encrypted = encrypter.encryptBytes(x, iv: iv);
         await outFile.create();
+        await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
       } else {
         print("encrypted");
         return "somePath";
       }
-
-      final encrypted = encrypter.encryptBytes(x, iv: iv);
-      await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
     } catch (e) {
       print("crashed very badly");
       final v = (videoFileContents.length / 10).floor();
+      var j = 0;
       for (var i = 0; i < videoFileContents.length; i = i + v) {
         final String outFilePath = '$mPath/$i.aes';
 
@@ -95,19 +96,20 @@ class EncryptDecrypt {
 
         final bool outFileExists = await outFile.exists();
         if (!outFileExists) {
+          List<int> x = convert.utf8.encode(videoFileContents.substring(
+              i,
+              (i + v) > videoFileContents.length
+                  ? videoFileContents.length
+                  : i + v));
+          final encrypted = encrypter.encryptBytes(x, iv: iv);
           await outFile.create();
+          await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
+          print("encrypted $i");
+          print(outFilePath);
         } else {
           print("encrypted");
-          return "somepath";
+          return "somePath";
         }
-
-        List<int> x = convert.utf8.encode(videoFileContents.substring(
-            i,
-            (i + v) > videoFileContents.length
-                ? videoFileContents.length
-                : i + v));
-        final encrypted = encrypter.encryptBytes(x, iv: iv);
-        await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
       }
     }
     return "somePath";
@@ -133,16 +135,19 @@ class EncryptDecrypt {
     final fileDir = Directory(filePath);
     final someFiles = fileDir.listSync();
     final List<Future<void>> futureThings = [];
-
+    print("uuuuuuuuuuuuuuuuuuuuuuuuuuu");
+    print(someFiles.length);
+    someFiles.forEach(print);
     for (final file in someFiles) {
       final videoFileContents = (file as File).readAsBytesSync();
-      if (basename(file.path, removeExtension: false) == "x.mp4") continue;
-      print("file read");
-
-      futureThings.add(decrypting({
-        'content': videoFileContents,
-        'file': outFile,
-      }));
+      if (basename(file.path, removeExtension: false) != "x.mp4") {
+        print("another one ");
+        print(file.path);
+        futureThings.add(decrypting({
+          'content': videoFileContents,
+          'file': outFile,
+        }));
+      }
     }
     await Future.wait(futureThings);
 
@@ -211,7 +216,9 @@ class Worker {
     print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
     print(message);
     print("oooooooooooooooooooooooooooooooooooo::=>$message");
-    _decryptedPath.complete(message as String);
+    message == 'somePath'
+        ? _encryptedPath.complete(message as String)
+        : _decryptedPath.complete(message as String);
   }
 
   Future<void> get isReady => _isolateReady.future;

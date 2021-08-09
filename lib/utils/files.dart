@@ -1,11 +1,15 @@
 import 'dart:io';
 
+import 'package:distancelearning_mobile/notifiers/file_setup_notifier.dart';
 import 'package:distancelearning_mobile/utils/file_encryption_decryption.dart';
 import 'package:ext_storage/ext_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:thumbnails/thumbnails.dart';
 
-Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
+Future<List<FileSystemEntity>> getFilesAndFolders(
+    {BuildContext? context, String? path}) async {
   final String mainDir = await getMainDirPath();
   final String newPath = path ?? mainDir;
   final Directory docDir = await getApplicationDocumentsDirectory();
@@ -15,24 +19,36 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
   final Directory otherDir = Directory(newOtherPath);
   final List<FileSystemEntity> tempFile = dir.listSync();
   final Worker worker = Worker();
+  if (context != null) {
+    Provider.of<FileSetupNotifier>(
+      context,
+      listen: false,
+    ).numOfFiles = tempFile.length;
+  }
+  var i = 0;
   await worker.isReady;
   for (final FileSystemEntity file in tempFile) {
     if (!basename(file.path, removeExtension: false).startsWith(".")) {
-      // print(file.path);
       if (file is File &&
           basename(file.path, removeExtension: false).split(".").last ==
               "mp4") {
-        print(file.path);
         final String? thumbnail = await getAThumbnail(file.path);
         if (thumbnail == null) await createThumbnail(file.path);
         await EncryptDecrypt.encrypt(file.path, worker: worker);
       }
     }
+    i++;
+    if (context != null) {
+      Provider.of<FileSetupNotifier>(
+        context,
+        listen: false,
+      ).numFilesMod = i;
+    }
   }
+  worker.dispose();
 
   final List<FileSystemEntity> realFile = otherDir.listSync();
   for (final FileSystemEntity afile in realFile) {
-    print(afile.path);
     // afile.deleteSync(recursive: true);
     if (afile is File &&
         basename(afile.path, removeExtension: false).split(".").last == "aes") {
@@ -46,7 +62,6 @@ Future<List<FileSystemEntity>> getFilesAndFolders([String? path]) async {
       files.add(afile);
     }
   }
-  worker.dispose();
 
   return files;
 }
@@ -60,7 +75,6 @@ Future<List<FileSystemEntity>> getFilesAndFoldersONLY([String? path]) async {
   final Directory otherDir = Directory(newOtherPath);
   final List<FileSystemEntity> realFile = otherDir.listSync();
   for (final FileSystemEntity afile in realFile) {
-    print(afile.path);
     // afile.deleteSync(recursive: true);
     if (afile is File &&
         basename(afile.path, removeExtension: false).split(".").last == "aes") {
@@ -126,12 +140,6 @@ Future<String?> getAThumbnail(String videoPathUrl) async {
       .listSync()
       .where((element) => element.path.split(".").last == "png")
       .toList();
-  for (final file in thumbnailFile) {
-    print(basename(file.path));
-    print(basename(videoPathUrl));
-    print(basename(file.path) == basename(videoPathUrl));
-    print("mmmmmmmmmmmmmmmmmmmmmmm");
-  }
   thumbnailFile = thumbnailFile
       .where((element) => basename(element.path) == basename(videoPathUrl))
       .toList();
