@@ -148,12 +148,12 @@ class ListVideoItem extends StatefulWidget {
   _ListVideoItemState createState() => _ListVideoItemState();
 }
 
+Worker worker = Worker();
+
 class _ListVideoItemState extends State<ListVideoItem> {
   late VideoPlayerController _videoController;
   late File videoFile;
   File? thumbnailFile;
-  Worker worker = Worker();
-  late File firstFile;
 
   @override
   void initState() {
@@ -169,12 +169,12 @@ class _ListVideoItemState extends State<ListVideoItem> {
     await worker.isReady;
     final String? thumbnail = await getAThumbnail(filePath);
     setState(() {
-      firstFile = Directory(widget.dir.path)
-          .listSync()
-          .where((element) =>
-              basename((element as File).path, removeExtension: false) ==
-              "x.mp4")
-          .toList()[0] as File;
+      // firstFile = Directory(widget.dir.path)
+      //     .listSync()
+      //     .where((element) =>
+      //         basename((element as File).path, removeExtension: false) ==
+      //         "x.mp4")
+      //     .toList()[0] as File;
       thumbnailFile =
           (thumbnail != null ? File(thumbnail) : thumbnail) as File?;
     });
@@ -211,7 +211,7 @@ class _ListVideoItemState extends State<ListVideoItem> {
             MaterialPageRoute(
               builder: (context) => VideoItems(
                 fileToBePlayed: runIsolate(),
-                firstFile: firstFile,
+                // firstFile: firstFile,
               ),
             ),
           );

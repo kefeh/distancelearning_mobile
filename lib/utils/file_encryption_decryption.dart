@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:distancelearning_mobile/utils/files.dart';
 import 'package:encrypt/encrypt.dart';
-import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path_provider/path_provider.dart';
 
 class EncryptDecrypt {
@@ -29,22 +28,22 @@ class EncryptDecrypt {
     } else {
       return outDir.path;
     }
-    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
-    final arguments = [
-      "-i",
-      filePath,
-      "-ss",
-      "00:00:00",
-      "-t",
-      "00:03:30",
-      "-c",
-      "copy",
-      "$mPath/x.mp4",
-    ];
-    _flutterFFmpeg
-        .executeWithArguments(arguments)
-        .then((rc) => print("FFmpeg process exited with rc $rc"));
-    print(filePath);
+    // final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+    // final arguments = [
+    //   "-i",
+    //   filePath,
+    //   "-ss",
+    //   "00:00:00",
+    //   "-t",
+    //   "00:03:30",
+    //   "-c",
+    //   "copy",
+    //   "$mPath/x.mp4",
+    // ];
+    // _flutterFFmpeg
+    //     .executeWithArguments(arguments)
+    //     .then((rc) => print("FFmpeg process exited with rc $rc"));
+    // print(filePath);
     worker == null
         ? await encryptFile(mPath, inFile: inFile)
         : await worker.encrypt({
@@ -66,51 +65,66 @@ class EncryptDecrypt {
         await inFile!.readAsString(encoding: convert.latin1);
     final key = Key.fromUtf8("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     final iv = IV.fromLength(16);
+    final chunkSize = videoFileContents.indexOf("mdat") + 4;
 
     final encrypter = Encrypter(AES(key));
     print("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
     print(videoFileContents.length);
     try {
-      final x = convert.utf8.encode(videoFileContents);
-      final String outFilePath = '$mPath/0.aes';
+      final x = convert.utf8.encode(videoFileContents.substring(0, chunkSize));
+      final String outFilePath0 = '$mPath/0.aes';
+      final String outFilePath1 = '$mPath/1.aes';
 
-      final File outFile = File(outFilePath);
+      final File outFile = File(outFilePath0);
+      final File outFile2 = File(outFilePath1);
 
       final bool outFileExists = await outFile.exists();
       if (!outFileExists) {
         final encrypted = encrypter.encryptBytes(x, iv: iv);
         await outFile.create();
-        await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
+        await outFile2.create();
+        await outFile2.writeAsBytes(
+            convert.latin1.encode(videoFileContents.substring(chunkSize)));
+        await outFile.writeAsBytes(encrypted.bytes);
       } else {
         print("encrypted");
         return "somePath";
       }
     } catch (e) {
       print("crashed very badly");
-      final v = (videoFileContents.length / 10).floor();
-      var j = 0;
-      for (var i = 0; i < videoFileContents.length; i = i + v) {
-        final String outFilePath = '$mPath/$i.aes';
+      print(e);
+      // final v = (videoFileContents.length / 10).floor();
+      // var j = 0;
+      // for (var i = 0; i < videoFileContents.length; i = i + v) {
+      //   final String outFilePath = '$mPath/$i.aes';
 
-        final File outFile = File(outFilePath);
+      //   final File outFile = File(outFilePath);
 
-        final bool outFileExists = await outFile.exists();
-        if (!outFileExists) {
-          List<int> x = convert.utf8.encode(videoFileContents.substring(
-              i,
-              (i + v) > videoFileContents.length
-                  ? videoFileContents.length
-                  : i + v));
-          final encrypted = encrypter.encryptBytes(x, iv: iv);
-          await outFile.create();
-          await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
-          print("encrypted $i");
-          print(outFilePath);
-        } else {
-          print("encrypted");
-          return "somePath";
-        }
-      }
+      //   final bool outFileExists = await outFile.exists();
+      //   if (!outFileExists) {
+      //     // List<int> x = convert.utf8.encode(videoFileContents.substring(
+      //     //     i,
+      //     //     (i + v) > videoFileContents.length
+      //     //         ? videoFileContents.length
+      //     //         : i + v));
+      //     List<int> x = videoFileContents
+      //         .substring(
+      //             i,
+      //             (i + v) > videoFileContents.length
+      //                 ? videoFileContents.length
+      //                 : i + v)
+      //         .codeUnits;
+
+      //     final encrypted = encrypter.encryptBytes(x, iv: iv);
+      //     await outFile.create();
+      //     await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
+      //     print("encrypted $i");
+      //     print(outFilePath);
+      //   } else {
+      //     print("encrypted");
+      //     return "somePath";
+      //   }
+      // }
     }
     return "somePath";
   }
@@ -138,18 +152,29 @@ class EncryptDecrypt {
     print("uuuuuuuuuuuuuuuuuuuuuuuuuuu");
     print(someFiles.length);
     someFiles.forEach(print);
-    for (final file in someFiles) {
-      final videoFileContents = (file as File).readAsBytesSync();
-      if (basename(file.path, removeExtension: false) != "x.mp4") {
-        print("another one ");
-        print(file.path);
-        futureThings.add(decrypting({
-          'content': videoFileContents,
-          'file': outFile,
-        }));
-      }
-    }
-    await Future.wait(futureThings);
+    final zeroFile = someFiles
+        .where((element) => (element as File).path.contains("0.aes"))
+        .toList()[0];
+    final firstFile = someFiles
+        .where((element) => (element as File).path.contains("1.aes"))
+        .toList()[0];
+
+    final videoFileContents0 = (zeroFile as File).readAsBytesSync();
+    print("another one ");
+    print(zeroFile.path);
+    print("0");
+    await decrypting({
+      'content': videoFileContents0,
+      'file': outFile,
+    });
+
+    print("1");
+    final lastSectionContent =
+        await (firstFile as File).readAsString(encoding: convert.latin1);
+    final decodedBytes = convert.latin1.encode(lastSectionContent);
+    outFile.writeAsBytesSync(decodedBytes, mode: FileMode.append);
+
+    // await Future.wait(futureThings);
 
     print("written to the file");
     print("Done");
@@ -171,6 +196,7 @@ Future<void> decrypting(Map vars) async {
   print("decrypted");
   final decryptedBytes = convert.latin1.encode(decrypted);
   outFile.writeAsBytesSync(decryptedBytes, mode: FileMode.append);
+  print("written to the file something here");
 }
 
 class Worker {

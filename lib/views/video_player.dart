@@ -8,11 +8,9 @@ class VideoItems extends StatefulWidget {
   final Future<String> fileToBePlayed;
   final bool? looping;
   final bool? autoplay;
-  final File firstFile;
 
   const VideoItems({
     required this.fileToBePlayed,
-    required this.firstFile,
     this.looping,
     this.autoplay,
     Key? key,
@@ -24,13 +22,11 @@ class VideoItems extends StatefulWidget {
 
 class _VideoItemsState extends State<VideoItems> {
   ChewieController? _chewieController;
-  ChewieController? _newController;
 
   bool shouldPop = true;
   late File toDelete;
   late String s;
   late VideoPlayerController videoPlayerController;
-  late VideoPlayerController newPlayerController;
 
   @override
   void initState() {
@@ -39,18 +35,18 @@ class _VideoItemsState extends State<VideoItems> {
   }
 
   Future<void> init() async {
-    setState(() {
-      newPlayerController = VideoPlayerController.file(widget.firstFile);
-      _newController = setController(newPlayerController);
-    });
-    final time = Stopwatch()..start();
     s = await widget.fileToBePlayed;
     setState(() {
       videoPlayerController = VideoPlayerController.file(File(s));
-      _chewieController =
-          setController(videoPlayerController, startAt: time.elapsed);
-      time.stop();
+      _chewieController = setController(videoPlayerController);
+
       toDelete = File(s);
+      final someFile = toDelete.readAsBytesSync();
+      print("ggsgsgsgsgsgsggsgsgsgsgsgsgsgsgsgsgsgsgsgsgsgsgsg");
+      print(toDelete);
+      print(someFile.length);
+
+      print(toDelete);
     });
   }
 
@@ -87,7 +83,8 @@ class _VideoItemsState extends State<VideoItems> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (videoPlayerController.value.isPlaying) {
+        if (videoPlayerController != null &&
+            videoPlayerController.value.isPlaying) {
           videoPlayerController.pause();
         }
         return shouldPop;
@@ -104,12 +101,8 @@ class _VideoItemsState extends State<VideoItems> {
                     ),
                   ],
                 )
-              : Stack(
-                  children: [
-                    Chewie(
-                      controller: _newController!,
-                    ),
-                  ],
+              : const Center(
+                  child: CircularProgressIndicator(),
                 ),
         ),
       ),
