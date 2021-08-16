@@ -106,40 +106,48 @@ class _SplashState extends State<Splash> {
                   const SizedBox(
                     height: 30,
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Future.wait([
-                        Provider.of<MainScreenChangeNotifier>(context,
-                                listen: false)
-                            .setFiles(
-                          directoryWorkingPath,
-                          context: context,
-                        )
-                      ]).then(
-                        (value) => Navigator.pushReplacementNamed(
-                          context,
-                          MainWidget.routeName,
-                        ),
+                  Consumer<FileSetupNotifier>(
+                    builder: (context, fileControl, child) {
+                      return GestureDetector(
+                        onTap: () {
+                          fileControl.numAreEqual
+                              ? Future.wait([
+                                  Provider.of<MainScreenChangeNotifier>(context,
+                                          listen: false)
+                                      .setFiles(
+                                    directoryWorkingPath,
+                                    context: context,
+                                  )
+                                ]).then(
+                                  (value) => {
+                                    Navigator.pushReplacementNamed(
+                                        context, MainWidget.routeName)
+                                  },
+                                )
+                              : null;
+                        },
+                        child: fileControl.numAreEqual
+                            ? Container(
+                                height: 60,
+                                width: 200,
+                                decoration: BoxDecoration(
+                                  color: const Color.fromRGBO(232, 70, 65, 80),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    "Continue",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : const CircularProgressIndicator(),
                       );
                     },
-                    child: Container(
-                      height: 60,
-                      width: 200,
-                      decoration: BoxDecoration(
-                        color: const Color.fromRGBO(232, 70, 65, 80),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "Continue",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
+                  ),
                 ],
               ),
             ),

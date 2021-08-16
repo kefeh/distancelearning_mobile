@@ -11,13 +11,14 @@ import 'package:thumbnails/thumbnails.dart';
 Future<List<FileSystemEntity>> getFilesAndFolders(
     {BuildContext? context, String? path}) async {
   final String mainDir = await getMainDirPath();
+  final bool recurse = path == null;
   final String newPath = path ?? mainDir;
   final Directory docDir = await getApplicationDocumentsDirectory();
   final String newOtherPath = path ?? docDir.path;
   final List<FileSystemEntity> files = [];
   final Directory dir = Directory(newPath);
   final Directory otherDir = Directory(newOtherPath);
-  final List<FileSystemEntity> tempFile = dir.listSync();
+  final List<FileSystemEntity> tempFile = dir.listSync(recursive: recurse);
   final Worker worker = Worker();
   if (context != null) {
     Provider.of<FileSetupNotifier>(
@@ -74,7 +75,6 @@ Future<List<FileSystemEntity>> getFilesAndFoldersONLY([String? path]) async {
   final String newOtherPath =
       path ?? (await getApplicationDocumentsDirectory()).path;
   final List<FileSystemEntity> files = [];
-  final Directory dir = Directory(newPath);
   final Directory otherDir = Directory(newOtherPath);
   final List<FileSystemEntity> realFile = otherDir.listSync();
   for (final FileSystemEntity afile in realFile) {

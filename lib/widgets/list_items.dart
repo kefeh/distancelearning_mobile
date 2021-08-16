@@ -151,7 +151,7 @@ class ListVideoItem extends StatefulWidget {
 Worker worker = Worker();
 
 class _ListVideoItemState extends State<ListVideoItem> {
-  late VideoPlayerController _videoController;
+  VideoPlayerController? _videoController;
   late File videoFile;
   File? thumbnailFile;
 
@@ -160,8 +160,6 @@ class _ListVideoItemState extends State<ListVideoItem> {
     super.initState();
     videoFile = File(widget.dir.path);
 
-    print("videoFile = File(widget.dir.path);");
-    print(videoFile);
     setThumbnailFile(widget.dir.path);
   }
 
@@ -183,7 +181,9 @@ class _ListVideoItemState extends State<ListVideoItem> {
   @override
   void dispose() {
     super.dispose();
-    _videoController.dispose();
+    if (_videoController != null) {
+      _videoController!.dispose();
+    }
     worker.dispose();
   }
 

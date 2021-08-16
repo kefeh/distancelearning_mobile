@@ -7,6 +7,7 @@ class FileSetupNotifier extends ChangeNotifier {
   int get numOfFiles => _numOfFiles;
   int get numFilesMod => _numFilesMod;
 
+  bool get numAreEqual => _numFilesMod == _numOfFiles;
   set numOfFiles(int num) {
     _numOfFiles = num;
     notifyListeners();

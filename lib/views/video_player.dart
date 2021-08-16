@@ -41,12 +41,6 @@ class _VideoItemsState extends State<VideoItems> {
       _chewieController = setController(videoPlayerController);
 
       toDelete = File(s);
-      final someFile = toDelete.readAsBytesSync();
-      print("ggsgsgsgsgsgsggsgsgsgsgsgsgsgsgsgsgsgsgsgsgsgsgsg");
-      print(toDelete);
-      print(someFile.length);
-
-      print(toDelete);
     });
   }
 
@@ -74,9 +68,8 @@ class _VideoItemsState extends State<VideoItems> {
   @override
   void dispose() {
     super.dispose();
-    print("file deleted");
     toDelete.deleteSync();
-    _chewieController != null ? _chewieController!.dispose() : print("s");
+    if (_chewieController != null) _chewieController!.dispose();
   }
 
   @override

@@ -52,8 +52,6 @@ class EncryptDecrypt {
             "inFile": inFile,
           });
 
-    print("DONE");
-
     return 'outFilePath';
   }
 
@@ -69,63 +67,23 @@ class EncryptDecrypt {
     final chunkSize = videoFileContents.indexOf("mdat") + 4;
 
     final encrypter = Encrypter(AES(key));
-    print("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
-    print(videoFileContents.length);
-    try {
-      final x = convert.utf8.encode(videoFileContents.substring(0, chunkSize));
-      final String outFilePath0 = '$mPath/0.aes';
-      final String outFilePath1 = '$mPath/1.aes';
+    final x = convert.utf8.encode(videoFileContents.substring(0, chunkSize));
+    final String outFilePath0 = '$mPath/0.aes';
+    final String outFilePath1 = '$mPath/1.aes';
 
-      final File outFile = File(outFilePath0);
-      final File outFile2 = File(outFilePath1);
+    final File outFile = File(outFilePath0);
+    final File outFile2 = File(outFilePath1);
 
-      final bool outFileExists = await outFile.exists();
-      if (!outFileExists) {
-        final encrypted = encrypter.encryptBytes(x, iv: iv);
-        await outFile.create();
-        await outFile2.create();
-        await outFile2.writeAsBytes(
-            convert.latin1.encode(videoFileContents.substring(chunkSize)));
-        await outFile.writeAsBytes(encrypted.bytes);
-      } else {
-        print("encrypted");
-        return "somePath";
-      }
-    } catch (e) {
-      print("crashed very badly");
-      print(e);
-      // final v = (videoFileContents.length / 10).floor();
-      // var j = 0;
-      // for (var i = 0; i < videoFileContents.length; i = i + v) {
-      //   final String outFilePath = '$mPath/$i.aes';
-
-      //   final File outFile = File(outFilePath);
-
-      //   final bool outFileExists = await outFile.exists();
-      //   if (!outFileExists) {
-      //     // List<int> x = convert.utf8.encode(videoFileContents.substring(
-      //     //     i,
-      //     //     (i + v) > videoFileContents.length
-      //     //         ? videoFileContents.length
-      //     //         : i + v));
-      //     List<int> x = videoFileContents
-      //         .substring(
-      //             i,
-      //             (i + v) > videoFileContents.length
-      //                 ? videoFileContents.length
-      //                 : i + v)
-      //         .codeUnits;
-
-      //     final encrypted = encrypter.encryptBytes(x, iv: iv);
-      //     await outFile.create();
-      //     await outFile.writeAsBytes(encrypted.bytes, mode: FileMode.append);
-      //     print("encrypted $i");
-      //     print(outFilePath);
-      //   } else {
-      //     print("encrypted");
-      //     return "somePath";
-      //   }
-      // }
+    final bool outFileExists = await outFile.exists();
+    if (!outFileExists) {
+      final encrypted = encrypter.encryptBytes(x, iv: iv);
+      await outFile.create();
+      await outFile2.create();
+      await outFile2.writeAsBytes(
+          convert.latin1.encode(videoFileContents.substring(chunkSize)));
+      await outFile.writeAsBytes(encrypted.bytes);
+    } else {
+      return "somePath";
     }
     return "somePath";
   }
@@ -142,7 +100,6 @@ class EncryptDecrypt {
     if (!outFileExists) {
       await outFile.create();
     }
-    print("outfile created");
     final key = Key.fromUtf8("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     final iv = IV.fromLength(16);
 
@@ -150,9 +107,6 @@ class EncryptDecrypt {
     final fileDir = Directory(filePath);
     final someFiles = fileDir.listSync();
     final List<Future<void>> futureThings = [];
-    print("uuuuuuuuuuuuuuuuuuuuuuuuuuu");
-    print(someFiles.length);
-    someFiles.forEach(print);
     final zeroFile = someFiles
         .where((element) => (element as File).path.contains("0.aes"))
         .toList()[0];
@@ -161,24 +115,16 @@ class EncryptDecrypt {
         .toList()[0];
 
     final videoFileContents0 = (zeroFile as File).readAsBytesSync();
-    print("another one ");
-    print(zeroFile.path);
-    print("0");
     await decrypting({
       'content': videoFileContents0,
       'file': outFile,
     });
-
-    print("1");
     final lastSectionContent =
         await (firstFile as File).readAsString(encoding: convert.latin1);
     final decodedBytes = convert.latin1.encode(lastSectionContent);
     outFile.writeAsBytesSync(decodedBytes, mode: FileMode.append);
 
     // await Future.wait(futureThings);
-
-    print("written to the file");
-    print("Done");
     return outFilePath;
   }
 }
@@ -192,12 +138,9 @@ Future<void> decrypting(Map vars) async {
   final encrypter = Encrypter(AES(key));
   final encryptedFile = Encrypted(content);
 
-  print("encrypter created");
   final decrypted = encrypter.decrypt(encryptedFile, iv: iv);
-  print("decrypted");
   final decryptedBytes = convert.latin1.encode(decrypted);
   outFile.writeAsBytesSync(decryptedBytes, mode: FileMode.append);
-  print("written to the file something here");
 }
 
 class Worker {
@@ -214,15 +157,12 @@ class Worker {
     _sendPort.send(fileInfo);
     _decryptedPath = Completer<String>();
     final k = await _decryptedPath.future;
-    print(k);
     return _decryptedPath.future;
   }
 
   Future<String> encrypt(Map<String, dynamic> fileInfo) async {
     _sendPort.send(fileInfo);
     _encryptedPath = Completer<String>();
-    final k = await _encryptedPath.future;
-    print(k);
     return _encryptedPath.future;
   }
 
@@ -240,9 +180,6 @@ class Worker {
       _isolateReady.complete();
       return;
     }
-    print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
-    print(message);
-    print("oooooooooooooooooooooooooooooooooooo::=>$message");
     message == 'somePath'
         ? _encryptedPath.complete(message as String)
         : _decryptedPath.complete(message as String);
@@ -265,9 +202,6 @@ class Worker {
               message["filePath"] as String,
               inFile: message["inFile"] as File,
             );
-      print(
-          "final pathString = EncryptDecrypt.decryptFile(message as String);");
-      print(pathString);
       sendPort.send(pathString);
     });
 

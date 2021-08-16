@@ -97,7 +97,13 @@ class _NavCrumState extends State<NavCrum> {
       if ((listParent.length - 1) == listOfParents.length) {
         listOfParents.add(listParent[listParent.length - 1]);
       } else {
-        listOfParents = listOfParents.sublist(0, listParent.length);
+        if ((listParent.length) <= listOfParents.length) {
+          listOfParents = listOfParents.sublist(0, listParent.length);
+        } else {
+          for (var i = 0; i < listParent.length; i++) {
+            listOfParents.add(listParent[i]);
+          }
+        }
       }
     });
     _scrollToEnd();
