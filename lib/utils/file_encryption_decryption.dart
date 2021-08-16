@@ -14,17 +14,18 @@ class EncryptDecrypt {
     //chunks, encrypting them and merging them, then do the same thing when
     // decrypting the file.
     // Also consider compressing the file to reduce the size (NOT very Important)
-    final appDocDir = await getApplicationDocumentsDirectory();
+    final appDocDir = await getMainDirPath(forApp: true);
+
     final mainPath = await getMainDirPath();
     final relPathToFile = filePath.split(mainPath).last;
     final File inFile = File(filePath);
 
     final somePath = "${relPathToFile.split('.').first}_file";
-    final String mPath = "${appDocDir.path}$somePath";
+    final String mPath = "$appDocDir/$somePath";
     final Directory outDir = Directory(mPath);
     final bool dExists = await outDir.exists();
     if (!dExists) {
-      await outDir.create();
+      await outDir.create(recursive: true);
     } else {
       return outDir.path;
     }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:distancelearning_mobile/notifiers/file_setup_notifier.dart';
 import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
 import 'package:distancelearning_mobile/screens/main_screen.dart';
+import 'package:distancelearning_mobile/utils/files.dart';
 import 'package:distancelearning_mobile/views/dialogs.dart';
 import 'package:distancelearning_mobile/widgets/helpers.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ class Splash extends StatefulWidget {
 class _SplashState extends State<Splash> {
   late final int numOfItems;
   late final int numFilesMod;
+  late String directoryWorkingPath;
   Timer startWait() {
     return Timer(
       const Duration(seconds: 2),
@@ -33,6 +35,7 @@ class _SplashState extends State<Splash> {
 
   Future<void> makeInitialFileRequest() async {
     final PermissionStatus filePermission = await Permission.storage.status;
+    directoryWorkingPath = await getMainDirPath(forApp: true);
     if (filePermission.isGranted) {
       Provider.of<MainScreenChangeNotifier>(context, listen: false)
           .setFiles(null, context: context);
@@ -105,9 +108,18 @@ class _SplashState extends State<Splash> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        MainWidget.routeName,
+                      Future.wait([
+                        Provider.of<MainScreenChangeNotifier>(context,
+                                listen: false)
+                            .setFiles(
+                          directoryWorkingPath,
+                          context: context,
+                        )
+                      ]).then(
+                        (value) => Navigator.pushReplacementNamed(
+                          context,
+                          MainWidget.routeName,
+                        ),
                       );
                     },
                     child: Container(

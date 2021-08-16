@@ -27,25 +27,29 @@ Future<List<FileSystemEntity>> getFilesAndFolders(
   }
   var i = 0;
   await worker.isReady;
-  for (final FileSystemEntity file in tempFile) {
-    if (!basename(file.path, removeExtension: false).startsWith(".")) {
-      if (file is File &&
-          basename(file.path, removeExtension: false).split(".").last ==
-              "mp4") {
-        final String? thumbnail = await getAThumbnail(file.path);
-        if (thumbnail == null) await createThumbnail(file.path);
-        await EncryptDecrypt.encrypt(file.path, worker: worker);
+  try {
+    for (final FileSystemEntity file in tempFile) {
+      if (!basename(file.path, removeExtension: false).startsWith(".")) {
+        if (file is File &&
+            basename(file.path, removeExtension: false).split(".").last ==
+                "mp4") {
+          final String? thumbnail = await getAThumbnail(file.path);
+          if (thumbnail == null) await createThumbnail(file.path);
+          await EncryptDecrypt.encrypt(file.path, worker: worker);
+        }
+      }
+      i++;
+      if (context != null) {
+        Provider.of<FileSetupNotifier>(
+          context,
+          listen: false,
+        ).numFilesMod = i;
       }
     }
-    i++;
-    if (context != null) {
-      Provider.of<FileSetupNotifier>(
-        context,
-        listen: false,
-      ).numFilesMod = i;
-    }
+    worker.dispose();
+  } catch (e) {
+    worker.dispose();
   }
-  worker.dispose();
 
   final List<FileSystemEntity> realFile = otherDir.listSync();
   for (final FileSystemEntity afile in realFile) {
@@ -107,18 +111,22 @@ String basename(String path, {bool removeExtension = true}) {
   return aBasename;
 }
 
-Future<String> getParentDirPath(String? path) async {
+Future<String> getParentDirPath(String? path, {bool forApp = false}) async {
   if (path == null) {
-    return getMainDirPath();
+    return getMainDirPath(forApp: forApp);
   } else {
     final List<String> splitPath = path.split("/");
     return splitPath.sublist(0, splitPath.length - 1).join("/");
   }
 }
 
-Future<String> getMainDirPath() {
-  return ExtStorage.getExternalStoragePublicDirectory(
-      ExtStorage.DIRECTORY_DOWNLOADS);
+Future<String> getMainDirPath({bool forApp = false}) async {
+  if (forApp) {
+    return "${(await getApplicationDocumentsDirectory()).path}/DE";
+  } else {
+    return ExtStorage.getExternalStoragePublicDirectory(
+        ExtStorage.DIRECTORY_DOWNLOADS);
+  }
 }
 
 Future<String> getThumbnail(String videoPathUrl) async {

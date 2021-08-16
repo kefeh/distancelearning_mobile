@@ -21,12 +21,13 @@ class MainWidget extends StatelessWidget {
 
     return WillPopScope(
       onWillPop: () async {
-        final String dirPath = await getMainDirPath();
+        final String dirPath = await getMainDirPath(forApp: true);
         final String parentDir =
             await getParentDirPath(parent['dir'].path.toString());
         if (parent['dir'].path == dirPath) {
           return Future.value(true);
         } else {
+          print(parentDir);
           context
               .read<MainScreenChangeNotifier>()
               .setFiles(parentDir, back: true);

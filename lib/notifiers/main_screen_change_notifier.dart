@@ -17,7 +17,8 @@ class MainScreenChangeNotifier extends ChangeNotifier {
       {BuildContext? context, bool back = false}) async {
     _files = await getFilesAndFolders(context: context, path: dirPath);
     final String parentPath = dirPath ??
-        await getParentDirPath(_files.isNotEmpty ? _files[0].path : null);
+        await getParentDirPath(_files.isNotEmpty ? _files[0].path : null,
+            forApp: true);
     _parent = {
       "dir": Directory(parentPath),
       "name": parentPath.split("/").last,
