@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:distancelearning_mobile/notifiers/file_setup_notifier.dart';
 import 'package:distancelearning_mobile/utils/file_encryption_decryption.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:thumbnails/thumbnails.dart';
 
 Future<List<FileSystemEntity>> getFilesAndFolders(
@@ -71,7 +73,6 @@ Future<List<FileSystemEntity>> getFilesAndFolders(
 }
 
 Future<List<FileSystemEntity>> getFilesAndFoldersONLY([String? path]) async {
-  final String newPath = path ?? await getMainDirPath();
   final String newOtherPath =
       path ?? (await getApplicationDocumentsDirectory()).path;
   final List<FileSystemEntity> files = [];

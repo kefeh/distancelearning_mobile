@@ -24,7 +24,7 @@ class SmallLayout extends StatelessWidget {
         ColoredBoxWithFlag(width: width, height: height),
         Align(
           alignment: AlignmentDirectional.bottomCenter,
-          child: Container(
+          child: SizedBox(
             width: double.infinity,
             height: ((2 * height) / 3) + 15,
             child: Stack(

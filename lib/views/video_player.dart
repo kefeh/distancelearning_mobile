@@ -48,7 +48,7 @@ class _VideoItemsState extends State<VideoItems> {
       {Duration? startAt}) {
     return ChewieController(
       videoPlayerController: vidController,
-      aspectRatio: vidController.value.aspectRatio,
+      aspectRatio: 16 / 9,
       autoInitialize: true,
       autoPlay: widget.autoplay ?? true,
       looping: widget.looping ?? false,
@@ -76,8 +76,7 @@ class _VideoItemsState extends State<VideoItems> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (videoPlayerController != null &&
-            videoPlayerController.value.isPlaying) {
+        if (videoPlayerController.value.isPlaying) {
           videoPlayerController.pause();
         }
         return shouldPop;

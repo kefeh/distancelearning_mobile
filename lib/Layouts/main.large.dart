@@ -54,7 +54,7 @@ class _LargeLayoutState extends State<LargeLayout> {
             ? 200
             : 100;
 
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: widget.height,
       child: Column(

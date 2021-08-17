@@ -59,9 +59,6 @@ class _SplashState extends State<Splash> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-    print("This is almost amazing then");
-    print(Provider.of<FileSetupNotifier>(context).numFilesMod ==
-        Provider.of<FileSetupNotifier>(context).numOfFiles);
     return Scaffold(
       backgroundColor: const Color(0xff468908),
       body: Stack(
@@ -110,21 +107,21 @@ class _SplashState extends State<Splash> {
                     builder: (context, fileControl, child) {
                       return GestureDetector(
                         onTap: () {
-                          fileControl.numAreEqual
-                              ? Future.wait([
-                                  Provider.of<MainScreenChangeNotifier>(context,
-                                          listen: false)
-                                      .setFiles(
-                                    directoryWorkingPath,
-                                    context: context,
-                                  )
-                                ]).then(
-                                  (value) => {
-                                    Navigator.pushReplacementNamed(
-                                        context, MainWidget.routeName)
-                                  },
-                                )
-                              : null;
+                          if (fileControl.numAreEqual) {
+                            Future.wait([
+                              Provider.of<MainScreenChangeNotifier>(context,
+                                      listen: false)
+                                  .setFiles(
+                                directoryWorkingPath,
+                                context: context,
+                              )
+                            ]).then(
+                              (value) => {
+                                Navigator.pushReplacementNamed(
+                                    context, MainWidget.routeName)
+                              },
+                            );
+                          }
                         },
                         child: fileControl.numAreEqual
                             ? Container(
@@ -214,6 +211,7 @@ class _BlinkingTextState extends State<BlinkingText>
     );
   }
 
+  @override
   dispose() {
     controller.dispose();
     super.dispose();

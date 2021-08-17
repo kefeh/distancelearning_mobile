@@ -1,16 +1,15 @@
 import 'dart:io';
 
+import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
 import 'package:distancelearning_mobile/utils/file_encryption_decryption.dart';
+import 'package:distancelearning_mobile/utils/files.dart';
+import 'package:distancelearning_mobile/views/video_player.dart';
+import 'package:distancelearning_mobile/widgets/helpers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
-
-import 'package:distancelearning_mobile/notifiers/main_screen_change_notifier.dart';
-import 'package:distancelearning_mobile/utils/files.dart';
-import 'package:distancelearning_mobile/views/video_player.dart';
-import 'package:distancelearning_mobile/widgets/helpers.dart';
 
 class ListFIleItem extends StatelessWidget {
   const ListFIleItem(

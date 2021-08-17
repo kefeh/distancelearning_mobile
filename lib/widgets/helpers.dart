@@ -95,7 +95,7 @@ class Flag extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Container(
+        return SizedBox(
           width: (width / 3) + 45,
           height: constraints.maxWidth > 600 ? height / 3 : (height / 3) - 20,
           child: Row(

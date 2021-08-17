@@ -27,7 +27,6 @@ class MainWidget extends StatelessWidget {
         if (parent['dir'].path == dirPath) {
           return Future.value(true);
         } else {
-          print(parentDir);
           context
               .read<MainScreenChangeNotifier>()
               .setFiles(parentDir, back: true);

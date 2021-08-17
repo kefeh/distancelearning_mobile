@@ -6,14 +6,9 @@ import 'dart:typed_data';
 
 import 'package:distancelearning_mobile/utils/files.dart';
 import 'package:encrypt/encrypt.dart';
-import 'package:path_provider/path_provider.dart';
 
 class EncryptDecrypt {
   static Future<String> encrypt(String filePath, {Worker? worker}) async {
-    //TODO: Encryption fails with large files, try breaking down the file into
-    //chunks, encrypting them and merging them, then do the same thing when
-    // decrypting the file.
-    // Also consider compressing the file to reduce the size (NOT very Important)
     final appDocDir = await getMainDirPath(forApp: true);
 
     final mainPath = await getMainDirPath();
@@ -29,22 +24,6 @@ class EncryptDecrypt {
     } else {
       return outDir.path;
     }
-    // final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
-    // final arguments = [
-    //   "-i",
-    //   filePath,
-    //   "-ss",
-    //   "00:00:00",
-    //   "-t",
-    //   "00:03:30",
-    //   "-c",
-    //   "copy",
-    //   "$mPath/x.mp4",
-    // ];
-    // _flutterFFmpeg
-    //     .executeWithArguments(arguments)
-    //     .then((rc) => print("FFmpeg process exited with rc $rc"));
-    // print(filePath);
     worker == null
         ? await encryptFile(mPath, inFile: inFile)
         : await worker.encrypt({
@@ -67,7 +46,8 @@ class EncryptDecrypt {
     final chunkSize = videoFileContents.indexOf("mdat") + 4;
 
     final encrypter = Encrypter(AES(key));
-    final x = convert.utf8.encode(videoFileContents.substring(0, chunkSize));
+    final data = videoFileContents.substring(0, chunkSize);
+    final x = convert.utf8.encode(data);
     final String outFilePath0 = '$mPath/0.aes';
     final String outFilePath1 = '$mPath/1.aes';
 
@@ -79,9 +59,30 @@ class EncryptDecrypt {
       final encrypted = encrypter.encryptBytes(x, iv: iv);
       await outFile.create();
       await outFile2.create();
-      await outFile2.writeAsBytes(
-          convert.latin1.encode(videoFileContents.substring(chunkSize)));
       await outFile.writeAsBytes(encrypted.bytes);
+      try {
+        await outFile2.writeAsBytes(
+            convert.latin1.encode(videoFileContents.substring(chunkSize)));
+      } catch (e) {
+        final encodeChunkSize = (videoFileContents.length / 4).ceil();
+        int y = chunkSize;
+        for (var i = chunkSize;
+            i < (videoFileContents.length - encodeChunkSize);
+            i = i + encodeChunkSize) {
+          y = i + chunkSize;
+          if (y > videoFileContents.length) {
+            await outFile2.writeAsBytes(
+              convert.latin1.encode(videoFileContents.substring(i)),
+              mode: FileMode.append,
+            );
+          } else {
+            await outFile2.writeAsBytes(
+              convert.latin1.encode(videoFileContents.substring(i, y)),
+              mode: FileMode.append,
+            );
+          }
+        }
+      }
     } else {
       return "somePath";
     }
@@ -100,13 +101,9 @@ class EncryptDecrypt {
     if (!outFileExists) {
       await outFile.create();
     }
-    final key = Key.fromUtf8("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    final iv = IV.fromLength(16);
 
-    final encrypter = Encrypter(AES(key));
     final fileDir = Directory(filePath);
     final someFiles = fileDir.listSync();
-    final List<Future<void>> futureThings = [];
     final zeroFile = someFiles
         .where((element) => (element as File).path.contains("0.aes"))
         .toList()[0];
@@ -156,7 +153,6 @@ class Worker {
   Future<String> decrypt(Map<String, dynamic> fileInfo) async {
     _sendPort.send(fileInfo);
     _decryptedPath = Completer<String>();
-    final k = await _decryptedPath.future;
     return _decryptedPath.future;
   }
 
